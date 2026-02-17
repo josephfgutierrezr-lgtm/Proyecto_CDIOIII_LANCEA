@@ -2,35 +2,39 @@
 
 Este documento detalla el plan de trabajo semestral, el seguimiento de hitos y el estado actual del desarrollo del sistema.
 
-**Estado Actual:** 🟡 Semana 3 (En Ejecución)  
-**Fase:** Prototipado Inicial y Pruebas Unitarias  
+**Estado Actual:** 🟡 Semana 3 (En Ejecución)
+**Fase:** Diseño Detallado y Pruebas Unitarias
 **Semestre:** 2026-I
 
---
+---
 
 ## 📊 Vista General (Gantt Chart)
 
+> La línea roja vertical indica la fecha actual.
+
 ```mermaid
 gantt
-    title Roadmap LANCEA - Semestre 1
-    dateFormat  X
-    axisFormat Sem %s
-    
-    section Fase 1: Diseño
-    Análisis y Re-Ingeniería (IMU vs Ultrasonido)   :done,    des1, 0, 2w
-    Adquisición de Componentes                      :done,    des2, 1w, 1w
-    Diseño Electrónico (Pinout/Diagramas)           :active,  des3, 2w, 1w
-    Diseño Conceptual 3D (Sled)                     :active,  des4, 2w, 1w
-    
+    title Cronograma LANCEA - Semestre 2026-I
+    dateFormat  YYYY-MM-DD
+    axisFormat  Sem %W
+    todayMarker on
+
+    section Fase 1: Diseño y Gestión
+    Análisis y Re-Ingeniería (IMU vs Ultrasonido)   :done,    des1, 2026-02-03, 12d
+    Compra de Componentes                           :done,    des2, 2026-02-10, 5d
+    Diseño Pinout y Diagramas                       :active,  des3, 2026-02-17, 5d
+    Diseño Conceptual 3D (Sled)                     :active,  des4, 2026-02-17, 5d
+
     section Fase 2: Firmware
-    Pruebas Unitarias (Hola Mundo Hardware)         :active,  dev1, 2.5w, 1.5w
-    Desarrollo Driver BNO055 + Algoritmo IMU        :         dev2, 4w, 3w
-    Integración Pantalla OLED y UI                  :         dev3, 6w, 2w
-    Sistema de Archivos (SD Logging)                :         dev4, 8w, 2w
-    
+    Pruebas Unitarias (Hola Mundo Hardware)         :active,  dev1, 2026-02-20, 7d
+    Desarrollo Driver BNO055 + Algoritmo IMU        :         dev2, after dev1, 14d
+    Integración Pantalla OLED y UI                  :         dev3, after dev2, 7d
+    Sistema de Archivos (SD Logging)                :         dev4, after dev3, 10d
+
     section Fase 3: Integración
-    Ensamblaje PCB y Chasis 3D                      :         int1, 10w, 2w
-    Pruebas de Campo (Lanzamientos)                 :         int2, 12w, 2w
-    
+    Ensamblaje PCB y Chasis 3D                      :         int1, after dev4, 7d
+    Pruebas de Campo (Lanzamientos)                 :         int2, after int1, 14d
+
     section Fase 4: Cierre
-    Documentación Final y Sustentación              :         doc1, 14w, 2w
+    Documentación Final                             :         doc1, after int2, 14d
+    Sustentación Final                              :crit,    milestone, after doc1, 0d
