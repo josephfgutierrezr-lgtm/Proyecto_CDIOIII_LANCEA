@@ -1,1 +1,44 @@
+# 🔧 Diseño de Hardware y Aviónica - LANCEA
 
+Este directorio documenta la arquitectura electrónica, el diseño de PCB y la integración mecánica del sistema LANCEA. El hardware está diseñado bajo restricciones de **aerodinámica** (factor de forma cilíndrico <22mm) y **resistencia a impactos** (fuerzas >15g).
+
+---
+
+## 📐 Vista General del Dispositivo
+
+El sistema se compone de una **PCB tipo "Strip" (Regla)** de doble cara montada sobre un chasis amortiguado ("Sled") impreso en 3D.
+
+![Render del Dispositivo](https://github.com/TU_USUARIO/LANCEA/blob/main/hardware/render_preview.png)
+*(Nota: Reemplazar esta imagen con el render de la PCB/Ensamblaje)*
+
+### Especificaciones Físicas
+* **Dimensiones PCB:** 110mm x 20mm.
+* **Diámetro del Chasis (Sled):** 24mm (ajustable según jabalina).
+* **Peso Total (con batería):** ~45g.
+* **Centro de Gravedad:** Ajustado al eje longitudinal para no alterar el vuelo.
+
+---
+
+## ⚡ Diagrama de Arquitectura
+
+El sistema utiliza una arquitectura de bus dual (I2C + SPI) para separar la adquisición de sensores (baja latencia) del almacenamiento masivo.
+
+```mermaid
+graph TD
+    BAT[Batería Li-Ion 14500<br>3.7V / 1000mAh] --> BMS[TP4056<br>Carga y Protección]
+    BMS --> SW[Interruptor]
+    SW --> ESP32[MCU: ESP32-S2 Mini<br>3.3V Logic]
+    
+    subgraph I2C Bus [Sensores y UI]
+        ESP32 -- GPIO 21/22 --> BNO[IMU: BNO055<br>Acelerómetro + Giroscopio]
+        ESP32 -- GPIO 21/22 --> OLED[OLED 0.91<br>128x32 Display]
+    end
+    
+    subgraph SPI Bus [Almacenamiento]
+        ESP32 -- VSPI --> SD[Módulo MicroSD<br>Logging de Datos]
+    end
+    
+    subgraph Interfaz Física
+        BTN[Pulsador] -- GPIO 4 --> ESP32
+        LED[LED Estado] -- GPIO 2 --> ESP32
+    end
