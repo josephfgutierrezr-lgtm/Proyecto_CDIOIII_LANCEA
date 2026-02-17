@@ -13,7 +13,7 @@ El objetivo es desarrollar un dispositivo embebido portátil capaz de medir par�
 
 ### Objetivos Específicos (KPIs)
 1.  **Captura de Aceleración:** Medición en 3 ejes con rango de $\pm16~g$.
-2.  **Cálculo de Velocidad:** Estimación de velocidad de salida entre $15~m/s$ y $35~m/s$.
+2.  **Cálculo de Velocidad:** Estimación de velocidad de salida entre 15m/s y 35m/s.
 3.  **Estimación de Distancia:** Proyección teórica del tiro entre 35m y 90m.
 4.  **Autonomía:** Operación continua $\ge 6$ horas sin recarga.
 5.  **Costo:** Presupuesto total entre \$800k y \$1.2M COP.
