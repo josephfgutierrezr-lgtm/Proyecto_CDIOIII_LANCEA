@@ -6,7 +6,7 @@ Este documento detalla el plan de trabajo semestral, el seguimiento de hitos y e
 **Fase:** Prototipado Inicial y Pruebas Unitarias  
 **Semestre:** 2026-I
 
----
+--
 
 ## 📊 Vista General (Gantt Chart)
 
