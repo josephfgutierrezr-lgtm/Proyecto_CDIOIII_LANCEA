@@ -40,5 +40,5 @@ graph TD
     
     subgraph Interfaz Física
         BTN[Pulsador] -- GPIO 4 --> ESP32
-        LED[LED Estado] -- GPIO 2 --> ESP32
+        Buzzer[Sonido Estado] -- GPIO 2 --> ESP32
     end
