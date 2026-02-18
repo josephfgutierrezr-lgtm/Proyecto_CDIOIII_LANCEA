@@ -1,0 +1,105 @@
+#include <Wire.h>
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
+
+Adafruit_MPU6050 mpu;
+
+// --------- Variables ---------
+float offset = 0.0;          // Offset de calibración horizontal
+float angulo_filtrado = 0.0; // Ángulo con filtro
+const float alpha = 0.25;    // Filtro rápido (0.2–0.3 ideal)
+
+unsigned long lastTime = 0;
+const int sampleTime = 5;    // 5 ms → 200 Hz
+
+// --------- SETUP ---------
+void setup() {
+  Serial.begin(115200);
+  delay(1000);
+
+  Wire.begin(21, 22); // Pines I2C ESP32
+
+  if (!mpu.begin()) {
+    Serial.println("No se encontró el MPU6050");
+    while (1);
+  }
+
+  // Configuración óptima
+  mpu.setAccelerometerRange(MPU6050_RANGE_2_G);
+  mpu.setFilterBandwidth(MPU6050_BAND_94_HZ);
+
+  Serial.println("MPU6050 listo");
+  Serial.println("Coloca la jabalina completamente horizontal...");
+  delay(3000);
+
+  calibrarHorizontal();
+
+  Serial.println("Calibracion completa");
+}
+
+// --------- LOOP ---------
+void loop() {
+
+  if (millis() - lastTime >= sampleTime) {
+    lastTime = millis();
+
+    sensors_event_t accel, gyro, temp;
+    mpu.getEvent(&accel, &gyro, &temp);
+
+    // Convertir a g
+    float Ax = accel.acceleration.x / 9.81;
+    float Ay = accel.acceleration.y / 9.81;
+    float Az = accel.acceleration.z / 9.81;
+
+    // --- AJUSTA SEGÚN TU MONTAJE ---
+    float A_long = Az;   // eje longitudinal (jabalina)
+    float A_p1   = Ax;
+    float A_p2   = Ay;
+
+    // Ángulo bruto
+    float angulo_raw = atan2(
+      sqrt(A_p1*A_p1 + A_p2*A_p2),
+      A_long
+    ) * 180.0 / PI;
+
+    // Quitar offset
+    float angulo = angulo_raw - offset;
+
+    // Filtro rápido (respuesta casi instantánea)
+    angulo_filtrado = alpha * angulo + (1 - alpha) * angulo_filtrado;
+
+    Serial.print("Angulo: ");
+    Serial.println(angulo_filtrado, 2);
+  }
+}
+
+// --------- FUNCION DE CALIBRACION ---------
+void calibrarHorizontal() {
+
+  float suma = 0;
+  const int muestras = 200;
+
+  for (int i = 0; i < muestras; i++) {
+
+    sensors_event_t accel, gyro, temp;
+    mpu.getEvent(&accel, &gyro, &temp);
+
+    float Ax = accel.acceleration.x / 9.81;
+    float Ay = accel.acceleration.y / 9.81;
+    float Az = accel.acceleration.z / 9.81;
+
+    float A_long = Az;
+    float A_p1   = Ax;
+    float A_p2   = Ay;
+
+    float angulo = atan2(
+      sqrt(A_p1*A_p1 + A_p2*A_p2),
+      A_long
+    ) * 180.0 / PI;
+
+    suma += angulo;
+    delay(5);
+  }
+
+  offset = suma / muestras;
+}
