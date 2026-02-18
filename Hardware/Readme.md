@@ -8,7 +8,7 @@ Este directorio documenta la arquitectura electrónica, el diseño de PCB y la i
 
 El sistema se compone de una **PCB tipo "Strip" (Regla)** de doble cara montada sobre un chasis amortiguado ("Sled") impreso en 3D.
 
-![Render del Dispositivo]([render_preview png])(https://github.com/user-attachments/assets/35435e63-3988-4843-8b94-5bf8a7de0638)
+![Render del Dispositivo]([render_preview png](https://github.com/user-attachments/assets/35435e63-3988-4843-8b94-5bf8a7de0638)
 
 
 ### Especificaciones Físicas
