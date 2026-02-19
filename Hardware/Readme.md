@@ -25,7 +25,7 @@ El sistema utiliza una arquitectura de bus dual (I2C + SPI) para separar la adqu
 
 ```mermaid
 graph TD
-    BAT[Batería Li-Ion 14500<br>3.7V / 1000mAh] --> BMS[TP4056<br>Carga y Protección]
+    BAT[Batería Li-ion 18650<br>3.7V / 2800mAh] --> BMS[TP4056<br>Carga y Protección]
     BMS --> SW[Interruptor]
     SW --> ESP32[MCU: ESP32-S2 Mini<br>3.3V Logic]
     
