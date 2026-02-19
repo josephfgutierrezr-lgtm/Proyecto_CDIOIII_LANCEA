@@ -4,7 +4,8 @@ Esta carpeta contiene la documentación técnica oficial de los componentes util
 
 Todos los documentos aquí almacenados corresponden a hojas de datos (Datasheets) oficiales de fabricante y especificaciones técnicas necesarias para el diseño electrónico y desarrollo del firmware.
 
- ## Microcontrolador
+
+ ## 🔧 Microcontrolador
  
-# XIAO ESP32C3. link con información necesaria para un buen uso del microcontrolador.
+ 💿 XIAO ESP32C3. link con información necesaria para un buen uso del microcontrolador.
       https://wiki.seeedstudio.com/es/XIAO_ESP32C3_Getting_Started/
