@@ -27,11 +27,10 @@ El sistema utiliza una arquitectura de bus dual (I2C + SPI) para separar la adqu
 graph TD
     BAT[Batería Li-ion 18650<br>3.7V / 2800mAh] --> BMS[TP4056<br>Carga y Protección]
     BMS --> SW[Interruptor]
-    SW --> ESP32[MCU: ESP32-S2 Mini<br>3.3V Logic]
+    SW --> ESP32[MCU:<br>XIAO ESP32C3<br>3.3V logging]
     
-    subgraph I2C Bus [Sensores y UI]
-        ESP32 -- GPIO 21/22 --> BNO[IMU: BNO055<br>Acelerómetro + Giroscopio]
-        ESP32 -- GPIO 21/22 --> OLED[OLED 0.91<br>128x32 Display]
+    subgraph I2C Bus [Sensores]
+        ESP32 -- GPIO 21/22 --> BNO[IMU:<br>BNO055<br>Acelerómetro + Giroscopio]
     end
     
     subgraph SPI Bus [Almacenamiento]
@@ -40,5 +39,5 @@ graph TD
     
     subgraph Interfaz Física
         BTN[Pulsador] -- GPIO 4 --> ESP32
-        Buzzer[Buzzer] -- GPIO 2 --> ESP32
+        ESP32 -- GPIO 2 --> Buzzer[Buzzer]
     end
