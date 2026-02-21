@@ -27,7 +27,7 @@ El sistema utiliza una arquitectura de bus dual (I2C + SPI) para separar la adqu
 graph TD
     BMS[TP4056<br>Carga y Protección] --- BAT[Batería Li-ion 18650<br>3.7V / 2800mAh]
     BAT --> SW[Interruptor]
-    SW --> LED[LED ESTADO ON]
+    SW --> LED[LED ON/OFF]
     LED --> ESP32[MCU:<br>XIAO ESP32C3<br>3.3V logging]
     
     subgraph I2C Bus [Sensores]
