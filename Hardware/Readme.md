@@ -25,19 +25,20 @@ El sistema utiliza una arquitectura de bus dual (I2C + SPI) para separar la adqu
 
 ```mermaid
 graph TD
-    BMS[TP4056<br>Carga y Protección]BMS[TP4056<br>Carga y Protección] ---> BAT[Batería Li-ion 18650<br>3.7V / 2800mAh]-->
-    BAT --> SW[Interruptor] -->LED[LED ESTADO ON]
+    BMS[TP4056<br>Carga y Protección] --- BAT[Batería Li-ion 18650<br>3.7V / 2800mAh]
+    BAT --> SW[Interruptor]
+    SW --> LED[LED ESTADO ON]
     LED --> ESP32[MCU:<br>XIAO ESP32C3<br>3.3V logging]
     
     subgraph I2C Bus [Sensores]
-        ESP32 -- GPIO 6/7 --> BNO[IMU:<br>BNO055 , MPU56050<br>Acelerómetro + Giroscopio]
+        ESP32 -- GPIO 6/7 --> BNO[IMU:<br>BNO055 / MPU6050<br>Acelerómetro + Giroscopio]
     end
     
     subgraph SPI Bus [Almacenamiento]
         ESP32 -- VSPI --> SD[Módulo MicroSD<br>Logging de Datos]
     end
     
-    subgraph Interfaz Física
-        BTN[Pulsador] <-- GPIO 4 --> ESP32
+    subgraph Interfaz Fisica [Interfaz Física]
+        BTN[Pulsador] -- GPIO 4 --> ESP32
         ESP32 -- GPIO 2 --> Buzzer[Buzzer]
     end
