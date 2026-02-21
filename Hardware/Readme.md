@@ -30,7 +30,7 @@ graph TD
     SW --> ESP32[MCU:<br>XIAO ESP32C3<br>3.3V logging]
     
     subgraph I2C Bus [Sensores]
-        ESP32 -- GPIO 21/22 --> BNO[IMU:<br>BNO055<br>Acelerómetro + Giroscopio]
+        ESP32 -- GPIO 6/7 --> BNO[IMU:<br>BNO055 , MPU56050<br>Acelerómetro + Giroscopio]
     end
     
     subgraph SPI Bus [Almacenamiento]
@@ -38,6 +38,6 @@ graph TD
     end
     
     subgraph Interfaz Física
-        BTN[Pulsador] -- GPIO 4 --> ESP32
+        BTN[Pulsador] <-- GPIO 4 --> ESP32
         ESP32 -- GPIO 2 --> Buzzer[Buzzer]
     end
