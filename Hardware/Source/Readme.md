@@ -1,6 +1,6 @@
 # ⚡ Diseño Electrónico y PCB - LANCEA
 
-Este directorio contiene los archivos fuente del diseño de la PCB para la aviónica del proyecto.
+Este directorio contiene los archivos fuente del diseño de la PCB para el proyecto.
 
 ## 🛠 Especificaciones
 * **Software:** KiCad 9.0
