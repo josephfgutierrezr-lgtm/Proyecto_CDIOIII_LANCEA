@@ -14,7 +14,6 @@ Validar que es posible ensamblar un sistema de adquisición de datos en una PCB 
 ### Resultados
 Se logró diseñar e integrar un prototipo funcional que respeta el factor de forma cilíndrico, asegurando que la baquelita y la batería se deslizan sin tensión mecánica dentro del diámetro de prueba (aprox. 24mm - 25mm).
 
-*(Reemplaza `imagen_diametro.jpg` por el nombre exacto de tu primera foto)*
 ![Prueba de Diámetro y Ensamble](./PRUEBA_1.jpg)
 
 ---
@@ -31,7 +30,6 @@ Para capturar la cinemática del vuelo, era crítico probar la viabilidad de est
 * **Ángulo:** Se obtuvieron lecturas coherentes de inclinación (Pitch/Roll) procesando los datos crudos del sensor en el microcontrolador.
 * **Autonomía:** El sistema demostró una operación continua superior a las expectativas iniciales utilizando celdas de Li-Ion, validando que una sola carga es suficiente para múltiples horas de recolección de datos en campo.
 
-*(Reemplaza `imagen_angulo_bateria.jpg` por el nombre exacto de tu segunda foto)*
 ![Prueba de Ángulo y Autonomía](./PRUEBA_2.jpg)
 
 ---
