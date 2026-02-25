@@ -1,6 +1,6 @@
 # ⚡ Firmware LANCEA (ESP32 Core)
 
-Este directorio contiene el código fuente C++ para el microcontrolador ESP32-S2/C3 Mini. El firmware implementa la lógica de adquisición de datos de alta velocidad, gestión de almacenamiento y transmisión inalámbrica bajo una arquitectura de **Máquina de Estados Finitos (FSM)**.
+Este directorio contiene el código fuente C++ para el microcontrolador XIAO ESP32C3. El firmware implementa la lógica de adquisición de datos de alta velocidad, gestión de almacenamiento y transmisión inalámbrica bajo una arquitectura de **Máquina de Estados Finitos (FSM)**.
 
 ---
 
@@ -24,20 +24,20 @@ Las siguientes librerías son obligatorias para compilar el proyecto:
 
 Configuración de pines definida en `config.h`:
 
-| Periférico | Interfaz | Pin ESP32 (GPIO) | Notas |
-| :--- | :--- | :--- | :--- |
-| **BNO055** | I2C_SDA | 21 | Bus I2C compartido |
-| **BNO055** | I2C_SCL | 22 | Bus I2C compartido |
-| **OLED** | I2C_SDA | 21 | Bus I2C compartido |
-| **OLED** | I2C_SCL | 22 | Bus I2C compartido |
-| **MicroSD** | SPI_CS | 5 | Chip Select |
-| **MicroSD** | SPI_MOSI | 23 | Master Out Slave In |
-| **MicroSD** | SPI_MISO | 19 | Master In Slave Out |
-| **MicroSD** | SPI_SCK | 18 | Reloj SPI |
-| **Botón** | Digital | 4 | INPUT_PULLUP |
-| **LED/Buzzer** | Digital | 2 | Indicador de Estado |
-
----
+| Pin XIAO ESP32-C3 | MPU6050 | BNO055 | Módulo SD | Buzzer | Pulsador |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **3V3 / VIN** | VCC | VCC | VCC | -- | -- |
+| **GND** | GND | GND | GND | GND | GND |
+| **D4 (GPIO6)** | SDA | SDA | -- | -- | -- |
+| **D5 (GPIO7)** | SCL | SCL | -- | -- | -- |
+| **D2 (GPIO4)** | -- | -- | CS | -- | -- |
+| **D8 (GPIO8)** | -- | -- | SCK | -- | -- |
+| **D9 (GPIO9)** | -- | -- | MISO | -- | -- |
+| **D10 (GPIO10)** | -- | -- | MOSI | -- | -- |
+| **D3 (GPIO5)** | INT | -- | -- | -- | -- |
+| **D6 (GPIO21)** | -- | -- | -- | SIGNAL | -- |
+| **D1 (GPIO3)** | -- | -- | -- | -- | SIGNAL |
+| **AD0 / ADR** | GND | -- | -- | -- | -- |
 
 ## 🧠 Lógica del Sistema (Arquitectura)
 
