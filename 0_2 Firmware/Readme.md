@@ -26,7 +26,7 @@ Configuración de pines definida en `config.h`:
 
 | Pin XIAO ESP32-C3 | MPU6050 | BNO055 | Módulo SD | Buzzer | Pulsador |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **3V3 / VIN** | VCC | VCC | VCC | -- | -- |
+| **3V3** | VCC | VCC | VCC | -- | -- |
 | **GND** | GND | GND | GND | GND | GND |
 | **D4 (GPIO6)** | SDA | SDA | -- | -- | -- |
 | **D5 (GPIO7)** | SCL | SCL | -- | -- | -- |
@@ -37,7 +37,7 @@ Configuración de pines definida en `config.h`:
 | **D3 (GPIO5)** | INT | -- | -- | -- | -- |
 | **D6 (GPIO21)** | -- | -- | -- | SIGNAL | -- |
 | **D1 (GPIO3)** | -- | -- | -- | -- | SIGNAL |
-| **AD0 / ADR** | GND | -- | -- | -- | -- |
+| **GND** | AD0 | ADR | -- | -- | -- |
 
 ## 🧠 Lógica del Sistema (Arquitectura)
 
