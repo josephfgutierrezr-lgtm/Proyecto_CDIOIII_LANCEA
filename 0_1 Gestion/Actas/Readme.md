@@ -26,7 +26,7 @@ La transición hacia la V2 fue impulsada por restricciones físicas (tamaño) y 
 
 | Subsistema | En la Versión 1 (Ideación) | En la Versión 2 (Realidad Actual) | Justificación del Cambio |
 | :--- | :--- | :--- | :--- |
-| **Sensores** | MPU6050 + Ultrasónico | **Solo IMU BNO055** | El ultrasonido no tiene alcance útil (>4m) y daña la aerodinámica. El BNO055 entrega cuaterniones por hardware, evitando el "Gimbal Lock". |
+| **Sensores** | MPU6050 + Ultrasónico | **MPU 6050 e IMU BNO055** | El ultrasonido no tiene alcance útil (>4m) y daña la aerodinámica. El BNO055 entrega cuaterniones por hardware, evitando el "Gimbal Lock". |
 | **Control** | ESP32 DevKit V1 | **ESP32-S2 / C3 Mini** | El DevKit estándar (28mm) no cabe en el tubo de la jabalina (25.2mm). |
 | **Energía** | Batería LiPo Plana | **Li-Ion Cilíndrica 14500** | La 14500 (14mm diámetro) permite un ensamble tubular perfecto en el "Sled" 3D y otorgó >7h de autonomía probada. |
 | **Interfaz** | Pantalla OLED | **Buzzer + LED de Estado** | Eliminación de OLED por consumo energético y espacio. El Buzzer brinda mejor feedback auditivo en campo abierto. |
