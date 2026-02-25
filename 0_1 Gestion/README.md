@@ -27,8 +27,8 @@ El proyecto se divide en dos fases semestrales según los lineamientos académic
 ### Fase 1: Hardware y Firmware Base (Semestre Actual)
 | Semanas | Hito / Entregable | Estado |
 | :--- | :--- | :--- |
-| **1-4** | Adquisición de componentes y Setup inicial del ESP32[cite: 65]. | 🟡 En Progreso |
-| **5-8** | Integración de sensores (IMU/Velocidad), detección de evento y Pantalla OLED[cite: 66]. | 🔴 Pendiente |
+| **1-4** | Adquisición de componentes y Setup inicial del ESP32[cite: 65]. |🟢 Hecho |
+| **5-8** | Integración de sensores (IMU/Velocidad), detección de evento y Pantalla OLED[cite: 66]. |  🟡 En proceso |
 | **9-12** | Implementación de almacenamiento local (MicroSD/SPIFFS)[cite: 66]. | 🔴 Pendiente |
 | **13-16** |Pruebas de campo, calibración de sensibilidad y documentación final[cite: 67]. | 🔴 Pendiente |
 
