@@ -47,7 +47,7 @@ El proyecto se divide en dos fases semestrales según los lineamientos académic
 * **RF-004:** Detección automática del evento de lanzamiento.
 * **RF-005:** Almacenamiento local ("Black Box") para mín. 30 lanzamientos.
 * **RF-006:** Transmisión asíncrona ("Store & Forward") al servidor.
-* **RF-007:** Visualización inmediata de resultados en pantalla OLED[cite: 10].
+* **RF-007:** Visualización inmediata de resultados en pantalla OLED.
 
 ### Requisitos No Funcionales (RNF)
 * **RNF-003 Portabilidad:** Peso total $\le 1.5$ kg e integración aerodinámica[cite: 12].
