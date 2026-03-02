@@ -36,7 +36,7 @@ El proyecto se divide en dos fases semestrales según los lineamientos académic
 ### Fase 2: Conectividad y Servidor (Próximo Semestre)
 * Despliegue de servidor local (Python/Flask).
 * Sincronización WiFi y Base de Datos.
-* Interfaz Web para visualización de historial[cite: 71].
+* Interfaz Web para visualización de historial.
 
 ---
 ## ⚙️ Matriz de Requisitos
