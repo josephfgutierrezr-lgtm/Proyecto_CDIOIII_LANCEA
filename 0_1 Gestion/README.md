@@ -8,7 +8,7 @@ Este directorio centraliza la documentación administrativa, planificación y an
 **Duración:** 2 Semestres (Fase I y II).
 ---
 
-## 🎯 Alcance del Proyecto
+## 🎯 Alcance del Proyecto:
 
 El objetivo es desarrollar un dispositivo embebido portátil capaz de medir parámetros cinemáticos críticos durante el entrenamiento de lanzamiento de jabalina.
 
