@@ -69,8 +69,8 @@ El proyecto se divide en dos fases semestrales según los lineamientos académic
 ---
 
 ## ⚠️ Gestión de Riesgos y Restricciones
-1.  **Conectividad:** La red WiFi en estadios no es garantizada. Se mitiga con almacenamiento en SD (RF-005)[cite: 19].
-2.  **Clima:** La alta humedad de Armenia requiere protección IP54 o uso de Silica Gel en la carcasa[cite: 58].
+1.  **Conectividad:** La red WiFi en estadios no es garantizada. Se mitiga con almacenamiento en SD (RF-005).
+2.  **Clima:** La alta humedad de Armenia requiere protección IP54 o uso de Silica Gel en la carcasa.
 3. **Vibración:** El impacto de la jabalina requiere amortiguación interna en el chasis impreso en 3D.
 
 ---
