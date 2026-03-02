@@ -2,7 +2,8 @@
 
 Este directorio centraliza la documentación administrativa, planificación y análisis de requisitos del sistema **LANCEA** (Sistema de Monitoreo y Detección de Lanzamiento de Jabalina).
 
-**Institución:** Programa de Ingeniería Electrónica (Septimo Semestre)  
+**Institución:** Universidad del Quindío.
+**Programa:** Ingeniería Electrónica (Séptimo Semestre)  
 **Ubicación:** Armenia, Quindío, Colombia   
 **Duración:** 2 Semestres (Fase I y II) 
 ---
