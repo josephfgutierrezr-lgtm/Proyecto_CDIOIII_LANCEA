@@ -51,8 +51,8 @@ El proyecto se divide en dos fases semestrales según los lineamientos académic
 
 ### Requisitos No Funcionales (RNF)
 * **RNF-003 Portabilidad:** Peso total $\le 1.5$ kg e integración aerodinámica[cite: 12].
-* **RNF-005 Resistencia Ambiental:** Operación en clima de Armenia ($15^\circ C - 35^\circ C$, Humedad 60-95%)[cite: 12, 17].
-* **RNF-012 Recuperabilidad:** Sistema "Offline-First" ante fallos de red WiFi[cite: 13].
+* **RNF-005 Resistencia Ambiental:** Operación en clima de Armenia ($15^\circ C - 35^\circ C$, Humedad 60-95%).
+* **RNF-012 Recuperabilidad:** Sistema "Offline-First" ante fallos de red WiFi.
 
 ---
 
