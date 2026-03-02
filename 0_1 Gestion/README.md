@@ -4,8 +4,8 @@ Este directorio centraliza la documentación administrativa, planificación y an
 
 **Institución:** Universidad del Quindío.
 **Programa:** Ingeniería Electrónica (Séptimo Semestre)  
-**Ubicación:** Armenia, Quindío, Colombia   
-**Duración:** 2 Semestres (Fase I y II) 
+**Ubicación:** Armenia, Quindío, Colombia.   
+**Duración:** 2 Semestres (Fase I y II).
 ---
 
 ## 🎯 Alcance del Proyecto
