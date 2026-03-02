@@ -61,7 +61,7 @@ El proyecto se divide en dos fases semestrales según los lineamientos académic
 **Presupuesto Estimado:** \$800.000 - \$1.200.000 COP[cite: 26].
 
 ### Componentes Principales (BOM)
-* **Microcontrolador:** ESP32 (Dual Core, WiFi/BT)[cite: 20, 22].
+* **Microcontrolador:** ESP32 (Dual Core, WiFi/BT).
 * **Sensores:** IMU BNO055 (Acelerómetro + Giroscopio). [cite_start]*Nota: Se utiliza IMU para cálculo de velocidad debido a limitaciones físicas del ultrasonido HC-SR04 en distancias >4m[cite: 24].*
 * **Energía:** Batería LiPo/Li-Ion (3.7V)[cite: 24].
 * **Interfaz:** Pantalla OLED 0.91" (I2C) y Pulsador físico.
