@@ -1,4 +1,4 @@
-# 📂 Gestión del Proyecto LANCEA
+# 📂 Gestión del Proyecto LANCEA:
 
 Este directorio centraliza la documentación administrativa, planificación y análisis de requisitos del sistema **LANCEA** (Sistema de Monitoreo y Detección de Lanzamiento de Jabalina).
 
