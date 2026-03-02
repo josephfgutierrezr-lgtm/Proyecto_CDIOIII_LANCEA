@@ -21,7 +21,7 @@ El objetivo es desarrollar un dispositivo embebido portátil capaz de medir par�
 
 ---
 
-## 📅 Roadmap de Implementación
+## 📅 Roadmap de Implementación:
 
 El proyecto se divide en dos fases semestrales según los lineamientos académicos:
 
