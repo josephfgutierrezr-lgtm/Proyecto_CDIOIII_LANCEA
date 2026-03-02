@@ -4,14 +4,14 @@ Este directorio documenta la arquitectura electrónica, el diseño de PCB y la i
 
 ---
 
-## 📐 Vista General del Dispositivo
+## 📐 Vista General del Dispositivo.
 
 El sistema se compone de una **PCB tipo "Strip" (Regla)** de doble cara montada sobre un chasis amortiguado ("Sled") impreso en 3D.
 
 ![Render del Dispositivo]([render_preview png](https://github.com/user-attachments/assets/35435e63-3988-4843-8b94-5bf8a7de0638)
 
 
-### Especificaciones Físicas
+### Especificaciones Físicas.
 * **Dimensiones PCB:** 110mm x 20mm.
 * **Diámetro del Chasis (Sled):** 24mm (ajustable según jabalina).
 * **Peso Total (con batería):** ~45g.
@@ -19,7 +19,7 @@ El sistema se compone de una **PCB tipo "Strip" (Regla)** de doble cara montada 
 
 ---
 
-## ⚡ Diagrama de Arquitectura
+## ⚡ Diagrama de Arquitectura.
 
 El sistema utiliza una arquitectura de bus dual (I2C + SPI) para separar la adquisición de sensores (baja latencia) del almacenamiento masivo.
 
