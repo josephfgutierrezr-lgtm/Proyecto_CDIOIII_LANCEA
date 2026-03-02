@@ -42,7 +42,7 @@ El proyecto se divide en dos fases semestrales según los lineamientos académic
 ## ⚙️ Matriz de Requisitos
 
 ### Requisitos Funcionales (RF)
-* **RF-001:** Captura de aceleración ($\pm16g$, $\pm0.5~m/s^2$)[cite: 9].
+* **RF-001:** Captura de aceleración ($\pm16g$, $\pm0.5~m/s^2$).
 * **RF-002:** Captura de velocidad de lanzamiento[cite: 9].
 * **RF-004:** Detección automática del evento de lanzamiento (Sensibilidad $\ge90\%$)[cite: 9].
 * **RF-005:** Almacenamiento local ("Black Box") para mín. [cite_start]30 lanzamientos[cite: 10].
