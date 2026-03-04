@@ -4,7 +4,7 @@ Esta matriz define los atributos funcionales, físicos y de rendimiento exactos 
 
 | Módulo / Componente | Criterio de Aceptación (El Atributo) | Métrica / Tolerancia Exacta (El DoD) |
 | :--- | :--- | :--- |
-| **Hardware:** Módulo de Potencia (Batería 14500 + TP4056) | Regulación de Voltaje y Autonomía | Salida lógica hacia el ESP32 estable entre **3.2V y 3.4V**. Capacidad de mantener el sistema encendido en modo de grabación continua por **≥ 6 horas**. |
+| **Hardware:** Módulo de Potencia (Batería 14500 + TP4056) | Regulación de Voltaje y Autonomía | Salida analógica hacia el ESP32 estable entre **3.2V y 3.4V**. Capacidad de mantener el sistema encendido en modo de grabación continua por **≥ 6 horas**. |
 | **Hardware:** PCB y Ruteo | Integridad de Señal (Buses I2C/SPI) | Cero interferencias o reinicios durante la operación del motor I2C a **400 kHz** (BNO055) y SPI a **4 MHz** (MicroSD). |
 | **Firmware:** Adquisición IMU (BNO055) | Rendimiento / No-blocking | Tiempo de ejecución del ciclo de lectura de aceleración y cuaterniones **< 10ms**. Cero uso de la función `delay()`. |
 | **Firmware:** Datalogger (MicroSD) | Velocidad de Escritura (Throughput) | Capacidad de escribir archivos `.csv` a una frecuencia estable de **100 Hz** (100 muestras por segundo) con **0% de pérdida de tramas** (dropped frames). |
