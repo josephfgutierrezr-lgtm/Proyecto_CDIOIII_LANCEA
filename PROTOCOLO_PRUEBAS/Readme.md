@@ -2,7 +2,7 @@
 
 Este directorio contiene los reportes oficiales de pruebas ejecutadas para el proyecto **LANCEA**. Todas las validaciones siguen los estándares de calidad industrial exigidos en el curso, eliminando la subjetividad y basando los resultados en **datos medibles y tolerancias exactas**.
 
-> 📊 **Documento Oficial:** [Descargar Protocolo de Pruebas Completo (Excel)](https://docs.google.com/spreadsheets/d/1hmodUZB4RpgECLQpkgpnOsaG3j49326qS3rEEbqlpOA/edit?usp=sharing) 
+> 📊 **Documento Oficial:** [Dar click para observar el protocolo de pruebas)](https://docs.google.com/spreadsheets/d/1hmodUZB4RpgECLQpkgpnOsaG3j49326qS3rEEbqlpOA/edit?usp=sharing) 
 
 ---
 
