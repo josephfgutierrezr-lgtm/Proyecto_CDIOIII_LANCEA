@@ -1,6 +1,6 @@
 # LANCEA — Guía de Instalación y Uso
 ## Sistema de Telemetría Inteligente para Jabalina
-LANCEA es un ecosistema integral de telemetría diseñado para capturar, procesar y analizar la dinámica del lanzamiento de jabalina en tiempo real. Este documento constituye la Guía de Instalación y Operación, proporcionando las instrucciones necesarias para integrar el hardware basado en el microcontrolador XIAO ESP32-C3 con la App LANCEA. A través de esta guía, el usuario podrá configurar el firmware del dispositivo, establecer la infraestructura de comunicación (vía USB o WiFi) y gestionar el flujo de datos biomecánicos para transformar cada lanzamiento en información accionable para el entrenamiento de alto rendimiento.
+   LANCEA es un ecosistema diseñado para capturar, procesar y analizar la dinámica del lanzamiento de jabalina en tiempo real. Este documento constituye la Guía de Instalación y Operación, proporcionando las instrucciones necesarias para integrar el hardware basado en el microcontrolador XIAO ESP32-C3 con la App LANCEA. A través de esta guía, el usuario podrá configurar el firmware del dispositivo, establecer la infraestructura de comunicación (vía USB o WiFi) y gestionar el flujo de datos biomecánicos para transformar cada lanzamiento en información accionable para el entrenamiento de alto rendimiento.
 
 ---
 
