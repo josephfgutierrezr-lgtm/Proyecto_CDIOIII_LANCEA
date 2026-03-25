@@ -1,6 +1,6 @@
 # 🛒 Lista de Materiales (Bill of Materials - BOM)
 
-Este documento detalla todos los componentes electrónicos, electromecánicos y materiales de manufactura necesarios para ensamblar **una (1) unidad** del sistema **LANCEA**.
+Este documento detalla todos los componentes electrónicos, electromecánicos, pecrios y materiales de manufactura necesarios para ensamblar **una (1) unidad** del sistema **LANCEA**.
 
 > 📄 **Versión Imprimible:** [Descargar BOM Completo en PDF]
 
