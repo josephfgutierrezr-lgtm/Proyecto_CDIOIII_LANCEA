@@ -1,4 +1,4 @@
-# 🚀 LANCEA - Emulador de Sistemas Dinámicos
+# 🚀 LANCEA 
 
 ![Estado: En Desarrollo](https://img.shields.io/badge/Estado-En_Desarrollo-yellow)
 ![Hardware: ESP32](https://img.shields.io/badge/Hardware-ESP32-blue)
