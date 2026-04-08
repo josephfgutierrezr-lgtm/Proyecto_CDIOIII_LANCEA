@@ -18,6 +18,7 @@ En esta sección se listan los componentes encargados del procesamiento, adquisi
 | 5 | **Tarjeta Memoria** | 1 | **MicroSD 16GB** Clase 10 | Almacenamiento masivo | $ 20.000 |
 
 ## 🔋 Sistema de Potencia
+A continuación se presentan los componentes responsables del suministro y gestión de la energía del sistema, estos elementos garantizan un funcionamiento autónomo, seguro y estable durante la operación en campo.
 
 | Ítem | Componente | Cant. | Referencia / Especificación | Función | Est. Costo (COP) |
 | :--- | :--- | :---: | :--- | :--- | :---: |
@@ -27,6 +28,7 @@ En esta sección se listan los componentes encargados del procesamiento, adquisi
 | 9 | **Portapilas** | 1 | Holder para 14500 (PCB Mount) | Soporte físico batería | $ 2.500 |
 
 ## 🛠️ Interfaz y Mecánica
+Esta sección agrupa los elementos de interacción con el usuario y los materiales necesarios para el ensamblaje físico del sistema, incluye componentes de señalización, control manual y estructura mecánica.
 
 | Ítem | Componente | Cant. | Referencia / Especificación | Función | Est. Costo (COP) |
 | :--- | :--- | :---: | :--- | :--- | :---: |
