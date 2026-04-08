@@ -24,21 +24,15 @@ Las siguientes librerías son obligatorias para compilar el proyecto:
 
 Configuración de pines definida en `config.h`:
 
-| Pin XIAO ESP32-C3 | MPU6050 | BNO055 | Módulo SD | Buzzer | Pulsador |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **3V3** | VCC | VCC | VCC | -- | -- |
-| **GND** | GND | GND | GND | GND | GND |
-| **D4 (GPIO6)** | SDA | SDA | -- | -- | -- |
-| **D5 (GPIO7)** | SCL | SCL | -- | -- | -- |
-| **D2 (GPIO4)** | -- | -- | CS | -- | -- |
-| **D8 (GPIO8)** | -- | -- | SCK | -- | -- |
-| **D9 (GPIO9)** | -- | -- | MISO | -- | -- |
-| **D10 (GPIO10)** | -- | -- | MOSI | -- | -- |
-| **D3 (GPIO5)** | INT | -- | -- | -- | -- |
-| **D6 (GPIO21)** | -- | -- | -- | SIGNAL | -- |
-| **D1 (GPIO3)** | -- | -- | -- | -- | SIGNAL |
-| **GND** | AD0 | ADR | -- | -- | -- |
-
+| Pin XIAO ESP32-C3 | MPU6050 | BNO055 | Buzzer |
+| :--- | :---: | :---: | :---: |
+| **3V3** | VCC | VCC | -- |
+| **GND** | GND | GND | GND |
+| **D4 (GPIO6)** | SDA | SDA | -- |
+| **D5 (GPIO7)** | SCL | SCL | -- |
+| **D3 (GPIO5)** | INT | -- | -- |
+| **D6 (GPIO21)** | -- | -- | SIGNAL |
+| **GND** | AD0 | ADR | -- |
 ## 🧠 Lógica del Sistema (Arquitectura)
 
 El sistema no ejecuta un bucle infinito simple. Opera como una **Máquina de Estados** para garantizar la seguridad de los datos.
