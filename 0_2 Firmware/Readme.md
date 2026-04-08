@@ -5,6 +5,7 @@ Este directorio contiene el código fuente C++ para el microcontrolador XIAO ESP
 ---
 
 ## 🛠️ Entorno de Desarrollo
+En esta sección se definen las herramientas, plataforma y dependencias necesarias para compilar, cargar y mantener el firmware del sistema, lo cual asegura reproducibilidad en el entorno de desarrollo entre los miembros del equipo.
 
 * **Platform:** PlatformIO (Recomendado) o Arduino IDE.
 * **Framework:** Arduino.
