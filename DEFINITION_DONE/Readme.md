@@ -4,7 +4,8 @@
 ---
 
 ## Criterios de Aceptación Globales
-Para que **cualquier tarea o iteración (IPAC)** se considere terminada, debe cumplir **obligatoriamente** con TODOS los siguientes criterios:
+Los siguientes criterios definen las condiciones mínimas que deben cumplirse para considerar una tarea o iteración como finalizada dentro del proyecto. Estos garantizan calidad, trazabilidad y validación tanto en software como en hardware.
+Para que cualquier tarea o iteración (IPAC) se considere terminada, debe cumplir obligatoriamente con TODOS los siguientes criterios:
 
 | # | Criterio | Verificación |
 |---|---|---|
@@ -19,12 +20,16 @@ Para que **cualquier tarea o iteración (IPAC)** se considere terminada, debe cu
 ## Criterios Específicos por Componente
 
 ### Firmware
+En esta sección se validan los criterios relacionados con el comportamiento del software embebido, asegurando estabilidad temporal en la adquisición de datos y correcta detección de eventos clave durante el lanzamiento.
+
 | Test ID | Parámetro | Tolerancia Aceptable | Estado |
 |---------|---|---|:---:|
 | TEST-FW-02 | Delta de tiempo entre muestras en CSV | σ < 1 ms (100 Hz estables) | ✅ Pass |
 | TEST-FW-01 Campo | Detección de lanzamiento por jerk | Trigger con Jerk > 50 m/s³ | ✅ Pass |
 
 ### Hardware / Mecánica
+Estos criterios verifican que las dimensiones físicas y el ensamblaje del sistema sean adecuados para su integración en la jabalina, garantizando ajuste correcto y funcionamiento sin fallas mecánicas.
+
 | Test ID | Parámetro | Tolerancia Aceptable | Estado |
 |---------|---|---|:---:|
 | TEST-HW-01 PCB | Ancho del sled | ≤ 20 mm | ✅ Pass |
@@ -32,6 +37,8 @@ Para que **cualquier tarea o iteración (IPAC)** se considere terminada, debe cu
 | TEST-HW-01 Chasis | Ajuste mecánico sin holgura | Sin sonido al agitar | ❌ WIP |
 
 ### Sistema Integrado / Datos
+En esta sección se evalúa el desempeño del sistema completo en condiciones reales de uso, incluyendo autonomía energética y confiabilidad en la captura y almacenamiento de datos.
+
 | Test ID | Parámetro | Tolerancia Aceptable | Estado |
 |---------|---|---|:---:|
 | TEST-MC-01 Potencia | Autonomía en campo | ≥ 6 horas continuas | ✅ Pass (7h15m) |
