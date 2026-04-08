@@ -47,6 +47,8 @@ En esta sección se evalúa el desempeño del sistema completo en condiciones re
 ---
 
 ## Lo que NO es "Done"
+A continuación se listan situaciones que, aunque aparenten estar completas, no cumplen con los criterios mínimos definidos por el equipo para considerar una tarea como finalizada:
+
 - ❌ "Funciona en mi máquina" sin prueba en hardware real
 - ❌ Código en rama feature sin merge a main
 - ❌ Prueba ejecutada pero no registrada en Bitácora_Trazabilidad
