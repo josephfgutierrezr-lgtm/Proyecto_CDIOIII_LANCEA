@@ -7,6 +7,7 @@ Este documento detalla todos los componentes electrónicos, electromecánicos, p
 ---
 
 ## ⚡ Electrónica Principal
+En esta sección se listan los componentes encargados del procesamiento, adquisición y visualización de datos, estos elementos constituyen el núcleo funcional del sistema, permitiendo la medición, almacenamiento y gestión de la información durante el lanzamiento.
 
 | Ítem | Componente | Cant. | Referencia / Especificación | Función | Est. Costo (COP) |
 | :--- | :--- | :---: | :--- | :--- | :---: |
