@@ -42,6 +42,7 @@ Esta sección agrupa los elementos de interacción con el usuario y los material
 ---
 
 ## 💰 Resumen de Presupuesto
+A continuación se presenta un resumen consolidado de los costos estimados por categoría, lo que permite visualizar la distribución del presupuesto total del sistema por unidad.
 
 | Categoría | Subtotal Estimado |
 | :--- | :--- |
@@ -55,6 +56,8 @@ Esta sección agrupa los elementos de interacción con el usuario y los material
 ---
 
 ## 📍 Proveedores Recomendados
+A continuación se sugieren proveedores confiables para la adquisición de los componentes, basados en disponibilidad, costo y experiencia previa en proyectos similares:
+
 * **Sensores:** Didácticas Electrónicas, Solar Green.
 * **Baterías:** MercadoLibre (Vendedores locales).
 * **Impresión 3D:** Lab de la Universidad o Hubs locales.
