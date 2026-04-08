@@ -12,7 +12,7 @@ En esta sección se definen las herramientas, plataforma y dependencias necesari
 * **Board:** `lolin_s2_mini` / `esp32dev` (Ajustar según hardware real).
 
 ### Dependencias (Librerías)
-Las siguientes librerías son obligatorias para compilar el proyecto:
+Las siguientes librerías son obligatorias para compilar el proyecto y permiten la correcta interacción con los sensores, pantalla y sistema de almacenamiento:
 1.  **Adafruit BNO055** (Driver del sensor IMU).
 2.  **Adafruit Unified Sensor** (Base para sensores Adafruit).
 3.  **Adafruit SSD1306** (Controlador de Pantalla OLED).
@@ -23,7 +23,7 @@ Las siguientes librerías son obligatorias para compilar el proyecto:
 
 ## 🔌 Pinout (Mapa de Conexiones)
 
-Configuración de pines definida en `config.h`:
+A continuación se presenta la asignación de pines utilizada en el sistema. Esta configuración está definida en el archivo config.h y es fundamental para garantizar la correcta conexión entre el microcontrolador y los periféricos.
 
 | Pin XIAO ESP32-C3 | MPU6050 | BNO055 | Buzzer |
 | :--- | :---: | :---: | :---: |
@@ -34,9 +34,9 @@ Configuración de pines definida en `config.h`:
 | **D3 (GPIO5)** | INT | -- | -- |
 | **D6 (GPIO21)** | -- | -- | SIGNAL |
 | **GND** | AD0 | ADR | -- |
-## 🧠 Lógica del Sistema (Arquitectura)
 
-El sistema no ejecuta un bucle infinito simple. Opera como una **Máquina de Estados** para garantizar la seguridad de los datos.
+## 🧠 Lógica del Sistema (Arquitectura)
+En esta sección se describe el comportamiento del firmware a nivel lógico, el sistema no opera mediante un bucle tradicional, sino mediante una Máquina de Estados Finitos (FSM), lo que permite controlar de forma estructurada los eventos, optimizar recursos y garantizar la integridad de los datos durante el proceso de adquisición.
 
 ### Diagrama de Flujo de Estados
 
