@@ -34,11 +34,6 @@ graph TD
         ESP32 -- GPIO 6/7 --> BNO[IMU:<br>BNO055 / MPU6050<br>Acelerómetro + Giroscopio]
     end
     
-    subgraph SPI Bus [Almacenamiento]
-        ESP32 -- VSPI --> SD[Módulo MicroSD<br>Logging de Datos]
-    end
-    
     subgraph Interfaz Fisica [Interfaz Física]
-        BTN[Pulsador] -- GPIO 4 --> ESP32
         ESP32 -- GPIO 2 --> Buzzer[Buzzer]
     end
