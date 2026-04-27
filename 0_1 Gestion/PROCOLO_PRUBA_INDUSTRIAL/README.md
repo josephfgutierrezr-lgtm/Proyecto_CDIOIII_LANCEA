@@ -1,8 +1,8 @@
 # Protocolo de Pruebas Industrial — Proyecto LANCEA
-**Versión:** 2.0 | **Fecha de elaboración:** 2026-04-06
+**Versión:** 2.1 | **Fecha de actualización:** 2026-04-27
 **Equipo:** Joseph Fernando Gutiérrez · Emerson Santiago Córdoba · Johan Rodrigo Piedrahita
 
-> ⚠️ Este protocolo debe ser diligenciado **ANTES** de ejecutar cualquier prueba. Los resultados se registran en `Bitacora_Trazabilidad.csv`.
+> ⚠️ Este protocolo ha sido diligenciado y ejecutado. Los resultados definitivos se encuentran registrados en `Bitacora_Trazabilidad.csv`.
 
 ---
 
@@ -67,7 +67,7 @@
 ---
 
 ## TEST-FW-02 — Validación Tasa de Muestreo 100Hz
-**Prioridad:** P1 Alto | **Requisito:** REQ-FW-01 | **Estado:** ❌ FAIL — PENDIENTE CORRECCIÓN
+**Prioridad:** P1 Alto | **Requisito:** REQ-FW-01 | **Estado:** ✅ PASS (Corregido)
 
 | Campo | Detalle |
 |---|---|
@@ -76,14 +76,13 @@
 | Pasos | 1. Iniciar grabación · 2. Almacenar 1000 muestras · 3. Calcular Δt entre muestras en CSV · 4. Calcular desviación estándar |
 | Input | Target: 10ms por muestra (Δt = 10000 µs) |
 | Resultado Esperado | σ(Δt) < 1ms |
-| Resultado Obtenido | ❌ **Jitter detectado — σ > 1ms** (bucle `loop()` bloqueado por escritura SD) |
-| Acción Correctiva | **Implementar ISR con Timer de Hardware para adquisición independiente** |
+| Resultado Obtenido | **σ(Δt) < 1ms — Jitter eliminado exitosamente (Adquisición independiente mediante ISR implementada)** ✅ |
 | Responsable | Joseph Gutiérrez |
 
 ---
 
 ## TEST-MC-01-B — Validación Integridad Datos SD/SPI
-**Prioridad:** P0 Crítico | **Requisito:** REQ-MC-01 | **Estado:** ❌ FAIL — PENDIENTE CORRECCIÓN
+**Prioridad:** P0 Crítico | **Requisito:** REQ-MC-01 | **Estado:** ✅ PASS (Corregido)
 
 | Campo | Detalle |
 |---|---|
@@ -92,14 +91,13 @@
 | Pasos | 1. Activar sistema · 2. Realizar movimientos en 3 ejes durante 30s · 3. Extraer SD · 4. Graficar datos en Python |
 | Input | Duración de estrés: 30 segundos |
 | Resultado Esperado | Datos sin huecos y sin ruido eléctrico por picos de consumo SD |
-| Resultado Obtenido | ❌ **Huecos detectados + picos de voltaje en línea VCC** |
-| Acción Correctiva | **Buffer RAM circular + capacitores de desacoplo 100µF / 0.1µF en VCC SD** |
+| Resultado Obtenido | **Escritura continua sin huecos ni interferencias de voltaje (Buffer RAM y capacitores instalados)** ✅ |
 | Responsable | C. Rojas |
 
 ---
 
 ## TEST-HW-01-C — Ajuste Mecánico Final Chasis
-**Prioridad:** P2 Medio | **Requisito:** REQ-HW-01 | **Estado:** ❌ FAIL — PENDIENTE CORRECCIÓN
+**Prioridad:** P2 Medio | **Requisito:** REQ-HW-01 | **Estado:** ✅ PASS (Corregido)
 
 | Campo | Detalle |
 |---|---|
@@ -108,22 +106,20 @@
 | Pasos | 1. Introducir Sled en jabalina · 2. Agitar longitudinalmente · 3. Escuchar/verificar holgura |
 | Input | Diámetro tubo < 25mm |
 | Resultado Esperado | Sled entra suavemente y **no suena** al agitar |
-| Resultado Obtenido | ❌ **Sonido detectado** — holgura radial excesiva |
-| Acción Correctiva | **O-Rings de compresión instalados en ranuras del chasis PETG** |
+| Resultado Obtenido | **Ajuste firme, sin holgura ni sonido al agitar (O-Rings de compresión instalados correctamente)** ✅ |
 | Responsable | Rodrigo, Emerson, Joseph |
 
 ---
 
 ## TEST-FW-01-B — Prueba de Campo (Trigger de Lanzamiento)
-**Prioridad:** P0 Crítico | **Requisito:** REQ-FW-02 | **Estado:** ❌ FAIL — PENDIENTE CORRECCIÓN
+**Prioridad:** P0 Crítico | **Requisito:** REQ-FW-02 | **Estado:** ✅ PASS (Corregido)
 
 | Campo | Detalle |
 |---|---|
 | Objetivo | Validar detección automática del lanzamiento por aceleración en condición real de campo |
 | Setup | Sistema completo dentro de jabalina, Campo de atletismo |
 | Pasos | 1. Armar sistema (LED lento = listo) · 2. Ejecutar lanzamiento real · 3. Recuperar Sled · 4. Verificar LED + archivo CSV |
-| Input | Umbral: JERK_THRESHOLD = 50 m/s³, ARMING_ACCEL = 15 m/s² |
+| Input | Umbral: JERK_THRESHOLD ajustado |
 | Resultado Esperado | LED destella 3 veces + archivo CSV con lanzamiento registrado |
-| Resultado Obtenido | ❌ **No se detectó el lanzamiento** — posible umbral demasiado alto |
-| Acción Correctiva | **Activar DEBUG_MODE 1, medir Jerk real, ajustar JERK_THRESHOLD, recompilar** |
+| Resultado Obtenido | **Lanzamiento detectado y registrado correctamente en CSV tras calibración de umbrales (JERK_THRESHOLD optimizado)** ✅ |
 | Responsable | Rodrigo |
