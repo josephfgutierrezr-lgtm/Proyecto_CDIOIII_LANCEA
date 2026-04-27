@@ -1,27 +1,25 @@
 // ================================================================
-//  LANCEA_WiFi.ino  —  XIAO ESP32-C3  v7.0
-//  Sistema de atletas desde la pagina web
-//
-//  NOVEDADES v7.0:
-//  · Hasta 10 atletas registrados en RAM
-//  · Selector de atleta activo desde celular/PC
-//  · Cada lanzamiento queda vinculado al atleta
-//  · Pagina /atletas  → gestionar atletas (agregar/seleccionar/borrar)
-//  · CSV y tabla filtrados por atleta activo
-//  · /csv?atleta=Todos  → exporta todos los atletas juntos
+//  LANCEA_WiFi.ino  —  XIAO ESP32-C3  v7.1
 //
 //  BUZZER:
-//  · Pin 21, pasivo, controlado con tone()/noTone()
-//  · Monitorea angulo en IDLE cada 100ms (sin bloquear)
-//  · Suena a 2kHz cuando el angulo esta entre 42° y 45°
-//  · Se apaga automaticamente al detectar el impulso
+//  · Pin 21, pasivo, tone()/noTone()
+//  · Monitorea angulo en IDLE cada 100ms
+//  · Suena a 2700Hz cuando angulo esta entre 42° y 45.8°
+//  · Se apaga al detectar impulso
+//
+//  BATERIA:
+//  · Pin A0, divisor resistivo 1/2 con 220k
+//  · Lee con analogReadMilliVolts() x16 muestras
+//  · Voltaje real = 2 * promedio_mV / 1000
+//  · Porcentaje basado en curva Li-Ion 3.0V=0% 4.2V=100%
+//  · Se publica en serial, /status JSON y pagina web
 //
 //  PAGINAS WEB:
-//    192.168.4.1/          → panel principal (atleta activo)
+//    192.168.4.1/          → panel principal
 //    192.168.4.1/atletas   → gestionar atletas
 //    192.168.4.1/csv       → CSV del atleta activo
 //    192.168.4.1/csv?a=Todos → CSV de todos
-//    192.168.4.1/status    → JSON estado
+//    192.168.4.1/status    → JSON estado + bateria
 //    192.168.4.1/reset     → borra lanzamientos del atleta activo
 //    192.168.4.1/resetall  → borra todo
 // ================================================================
@@ -43,10 +41,11 @@ const IPAddress AP_IP(192, 168, 4, 1);
 // ================================================================
 //  PINES  XIAO ESP32-C3
 // ================================================================
-#define I2C_SDA   6
-#define I2C_SCL   7
-#define LED_PIN  10
+#define I2C_SDA    6
+#define I2C_SCL    7
+#define LED_PIN   10
 #define BUZZER_PIN 21
+#define BAT_PIN    A0
 
 // ================================================================
 //  PARAMETROS FISICOS
@@ -114,14 +113,13 @@ struct Atleta {
 
 Atleta atletas[MAX_ATLETAS];
 int    numAtletas    = 0;
-int    atletaActivo  = -1;   // -1 = sin seleccion
+int    atletaActivo  = -1;
 
-// Agrega atleta, devuelve indice o -1 si esta lleno/duplicado
 int agregarAtleta(const String& nombre) {
   String n = nombre; n.trim();
   if (n.length() == 0 || n.length() >= MAX_NAME_LEN) return -1;
   for (int i=0; i<numAtletas; i++)
-    if (String(atletas[i].nombre) == n) return i;   // ya existe
+    if (String(atletas[i].nombre) == n) return i;
   if (numAtletas >= MAX_ATLETAS) return -1;
   n.toCharArray(atletas[numAtletas].nombre, MAX_NAME_LEN);
   atletas[numAtletas].activo = false;
@@ -140,19 +138,19 @@ String nombreActivo() {
 }
 
 // ================================================================
-//  HISTORIAL RAM — con referencia al atleta
+//  HISTORIAL RAM
 // ================================================================
 #define MAX_THROWS 100
 
 struct ThrowRecord {
   uint8_t num;
   float   velFinal, maxAccel, angle, impulseTime, distance, energy, power;
-  int8_t  atletaIdx;   // indice en atletas[], -1 si no habia atleta
+  int8_t  atletaIdx;
 };
 
 ThrowRecord throwLog[MAX_THROWS];
 int         throwLogCount = 0;
-int         throwCount    = 0;   // contador global de la sesion
+int         throwCount    = 0;
 
 // ================================================================
 //  SERVIDOR WEB
@@ -172,8 +170,8 @@ unsigned long startImpulse=0;
 // ================================================================
 const float          ANGLE_OPT_LOW      = 42.0f;
 const float          ANGLE_OPT_HIGH     = 45.8f;
-const int            BUZZER_FREQ        = 2700;   // Hz
-const unsigned long  BUZZER_INTERVAL_MS = 100;    // medir cada 100ms
+const int            BUZZER_FREQ        = 2700;
+const unsigned long  BUZZER_INTERVAL_MS = 100;
 
 bool          buzzerActive    = false;
 unsigned long lastBuzzerCheck = 0;
@@ -199,7 +197,7 @@ void updateAngleBuzzer() {
     if (!buzzerActive) {
       tone(BUZZER_PIN, BUZZER_FREQ);
       buzzerActive = true;
-      safePrintln("[BUZZER] ON  — angulo: " + String(currentAngle, 1) + " deg (42-45)");
+      safePrintln("[BUZZER] ON  — angulo: " + String(currentAngle, 1) + " deg (42-45.8)");
     }
   } else {
     if (buzzerActive) {
@@ -209,6 +207,55 @@ void updateAngleBuzzer() {
     }
   }
 }
+
+// ================================================================
+//  MONITOREO DE BATERIA
+// ================================================================
+#define BAT_SAMPLES        16
+#define BAT_INTERVAL_MS    15000   // leer cada 15 segundos
+
+float         batVoltage   = 0.0f;
+int           batPercent   = 0;
+unsigned long lastBatCheck = 0;
+
+// Genera el color HTML segun nivel de bateria
+String batColor() {
+  if (batPercent > 50) return "#00FF88";
+  if (batPercent > 20) return "#F0A500";
+  return "#FF3B5C";
+}
+
+// Genera barra de texto unicode (10 bloques)
+String batBar() {
+  String bar = "";
+  int filled = batPercent / 10;
+  for (int i = 0; i < 10; i++)
+    bar += (i < filled) ? "&#9608;" : "&#9617;";
+  return bar;
+}
+
+void updateBattery() {
+  if (millis() - lastBatCheck < BAT_INTERVAL_MS) return;
+  lastBatCheck = millis();
+
+  uint32_t Vbatt = 0;
+  for (int i = 0; i < BAT_SAMPLES; i++)
+    Vbatt += analogReadMilliVolts(BAT_PIN);
+
+  // divisor 1/2  →  voltaje real = 2 * promedio_mV / 1000
+  batVoltage = 2.0f * Vbatt / BAT_SAMPLES / 1000.0f;
+
+  // Curva Li-Ion: 4.2V = 100%  |  3.0V = 0%
+  batPercent = constrain(
+    (int)((batVoltage - 3.0f) / (4.2f - 3.0f) * 100.0f), 0, 100);
+
+  safePrint("[BAT] ");
+  safePrint(String(batVoltage, 3));
+  safePrint(" V  →  ");
+  safePrint(String(batPercent));
+  safePrintln("%");
+}
+
 // ================================================================
 //  SERIAL SEGURO
 // ================================================================
@@ -249,19 +296,17 @@ void setup() {
   Serial.begin(115200);
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
-
   pinMode(BUZZER_PIN, OUTPUT);
   noTone(BUZZER_PIN);
+  pinMode(BAT_PIN, INPUT);
 
   delay(3000);
-
   Wire.begin(I2C_SDA, I2C_SCL);
 
   safePrintln("================================================");
-  safePrintln("  LANCEA  WiFi  v7.0  —  XIAO ESP32-C3");
+  safePrintln("  LANCEA  WiFi  v7.1  —  XIAO ESP32-C3");
   safePrintln("================================================");
 
-  // Atleta por defecto
   agregarAtleta("Invitado");
   seleccionarAtleta(0);
 
@@ -272,14 +317,22 @@ void setup() {
   bno.setExtCrystalUse(true);
   safePrintln("[OK]   BNO055 listo.");
 
+  // Lectura inicial de bateria
+  updateBattery();
+  lastBatCheck = 0;   // forzar otra lectura en el primer ciclo real
+  updateBattery();
+
   initWiFi();
   registerRoutes();
   server.begin();
 
   safePrintln("[WEB]  http://192.168.4.1");
   safePrintln("[WEB]  http://192.168.4.1/atletas");
-  safePrintln("[BUZZER] Pin " + String(BUZZER_PIN) + " | Angulo optimo: " +
-              String(ANGLE_OPT_LOW,0) + "-" + String(ANGLE_OPT_HIGH,0) + " deg");
+  safePrintln("[BUZZER] Pin " + String(BUZZER_PIN) +
+              " | Angulo optimo: " + String(ANGLE_OPT_LOW,0) +
+              "-" + String(ANGLE_OPT_HIGH,1) + " deg");
+  safePrintln("[BAT]  Pin A0 | " + String(batVoltage,3) +
+              " V | " + String(batPercent) + "%");
   safePrintln(">>> Listo. Atleta: " + nombreActivo());
   safePrintln("------------------------------------------------");
 
@@ -317,7 +370,8 @@ void loop() {
   server.handleClient();
   handleCommands();
   led.update();
-  updateAngleBuzzer();   // monitoreo continuo de angulo, no bloquea
+  updateAngleBuzzer();
+  updateBattery();
 
   switch (estadoActual) {
     case IDLE: {
@@ -356,12 +410,10 @@ void loop() {
   prev_aMag = aMag;
 
   if (estadoActual==IDLE && jerk>JERK_THRESHOLD) {
-    // Apagar buzzer inmediatamente al detectar el impulso
     if (buzzerActive) {
       noTone(BUZZER_PIN);
       buzzerActive = false;
     }
-
     estadoActual = IMPULSO;
     startImpulse = millis();
     digitalWrite(LED_PIN, LOW);
@@ -428,6 +480,9 @@ String htmlHeader(const String& title) {
   h += "border-radius:6px;padding:6px 14px;margin:3px;text-align:center}";
   h += ".badge span{display:block;font-size:1.5em;font-weight:bold}";
   h += ".v{color:#00C8FF}.a{color:#F0A500}.d{color:#00FF88}.e{color:#A855F7}.p{color:#EC4899}";
+  // Barra de bateria en header
+  h += ".bat-bar{display:inline-block;background:#0F1C2E;border:1px solid #1A3050;";
+  h += "border-radius:6px;padding:5px 12px;margin:3px;font-size:.85em;vertical-align:middle}";
   h += "table{width:100%;border-collapse:collapse;font-size:.82em;margin-top:8px}";
   h += "th{background:#0B1520;color:#6B8BA4;padding:7px 5px;text-align:center;border-bottom:1px solid #1A3050}";
   h += "td{padding:6px 5px;text-align:center;border-bottom:1px solid #0B1520}";
@@ -441,19 +496,32 @@ String htmlHeader(const String& title) {
   h += ".ok{color:#00FF88}.warn{color:#F0A500}.bad{color:#FF3B5C}";
   h += "input[type=text]{background:#0F1C2E;color:#E8F4FD;border:1px solid #1A3050;";
   h += "border-radius:6px;padding:8px 12px;font-family:monospace;font-size:1em;width:200px}";
-  h += ".nav{margin-bottom:16px}";
+  h += ".nav{margin-bottom:16px;display:flex;align-items:center;gap:0}";
   h += ".nav a{color:#6B8BA4;text-decoration:none;margin-right:16px;font-size:.85em}";
   h += ".nav a:hover{color:#00C8FF}";
+  h += ".nav-bat{margin-left:auto}";
   h += ".atleta-activo{color:#00C8FF;font-weight:bold}";
   h += "</style></head><body>";
-  h += "<div class='nav'><a href='/'>Panel</a><a href='/atletas'>Atletas</a></div>";
+
+  // Barra de navegacion con bateria integrada en la esquina derecha
+  h += "<div class='nav'>";
+  h += "<a href='/'>Panel</a><a href='/atletas'>Atletas</a>";
+  h += "<span class='nav-bat bat-bar'>";
+  h += "<span style='color:" + batColor() + "'>&#9889; ";
+  h += batBar();
+  h += " " + String(batPercent) + "% (" + String(batVoltage, 2) + "V)";
+  h += "</span></span>";
+  h += "</div>";
+
   return h;
 }
 
 String htmlFooter() {
   String f = "<br><div style='color:#334B62;font-size:.75em;margin-top:20px'>";
-  f += "LANCEA v7.0 | RAM: " + String(MAX_THROWS-throwLogCount) + " slots libres";
+  f += "LANCEA v7.1 | RAM: " + String(MAX_THROWS-throwLogCount) + " slots libres";
   f += " | Atleta: <span class='atleta-activo'>" + nombreActivo() + "</span>";
+  f += " | <span style='color:" + batColor() + "'>&#9889; Bat: ";
+  f += batBar() + " " + String(batPercent) + "% (" + String(batVoltage,2) + "V)</span>";
   f += "</div></body></html>";
   return f;
 }
@@ -466,7 +534,6 @@ void handleRoot() {
   server.send(200, "text/html; charset=utf-8", "");
   server.sendContent(htmlHeader("Panel"));
 
-  // Estado + atleta activo
   String s = "<h1>&#9651; LANCEA</h1>";
   s += "<div class='sub'>";
   s += estadoActual==IMPULSO ? "&#128308; INTEGRANDO" :
@@ -474,14 +541,20 @@ void handleRoot() {
                                "&#128994; EN ESPERA";
   s += " &nbsp;|&nbsp; Atleta: <span class='atleta-activo'>" + nombreActivo() + "</span>";
 
-  // Contar lanzamientos del atleta activo
   int cuentaActivo = 0;
   for (int i=0;i<throwLogCount;i++)
     if (throwLog[i].atletaIdx == atletaActivo) cuentaActivo++;
   s += " &nbsp;|&nbsp; " + String(cuentaActivo) + " lanzamiento(s)</div>";
   server.sendContent(s);
 
-  // Badges del atleta activo
+  // Badge de bateria destacado en el panel
+  s  = "<div class='badge' style='border-color:" + batColor() + "'>";
+  s += "<span style='color:" + batColor() + ";font-size:1.3em'>";
+  s += "&#9889; " + String(batPercent) + "%</span>";
+  s += batBar() + "<br><small style='color:#334B62'>" + String(batVoltage,3) + " V</small></div>";
+  server.sendContent(s);
+
+  // Badges de rendimiento del atleta activo
   float bestV=0,bestD=0,bestE=0,sumA=0; int cnt=0;
   for (int i=0;i<throwLogCount;i++) {
     if (throwLog[i].atletaIdx != atletaActivo) continue;
@@ -499,7 +572,7 @@ void handleRoot() {
     server.sendContent(s);
   }
 
-  // Tabla solo del atleta activo
+  // Tabla
   server.sendContent(
     "<table><tr><th>#</th><th>Vel(m/s)</th><th>Ang</th><th>Dist(m)</th>"
     "<th>Acel</th><th>t(s)</th><th>E(J)</th><th>P(W)</th><th>Ang?</th></tr>"
@@ -528,7 +601,6 @@ void handleRoot() {
   if (!hayDatos)
     server.sendContent("<tr><td colspan='9' style='color:#334B62;padding:16px'>Sin lanzamientos para este atleta</td></tr>");
 
-  // Botones
   s  = "</table><br>";
   s += "<a class='btn' href='/csv'>&#8595; CSV " + nombreActivo() + "</a>";
   s += "<a class='btn btn-gray' href='/csv?a=Todos'>&#8595; CSV Todos</a>";
@@ -551,7 +623,6 @@ void handleAtletas() {
   s += "<div class='sub'>Selecciona el atleta activo o registra uno nuevo</div>";
   server.sendContent(s);
 
-  // Lista de atletas con boton seleccionar y borrar
   server.sendContent("<h2>Atletas registrados</h2><table><tr><th>Nombre</th><th>Lanzamientos</th><th>Accion</th></tr>");
 
   for (int i=0; i<numAtletas; i++) {
@@ -576,7 +647,6 @@ void handleAtletas() {
   }
   server.sendContent("</table>");
 
-  // Formulario agregar atleta
   s  = "<h2>Registrar nuevo atleta</h2>";
   s += "<form action='/add_atleta' method='post'>";
   s += "<input type='text' name='nombre' placeholder='Nombre del atleta' maxlength='23'>";
@@ -620,17 +690,14 @@ void handleAddAtleta() {
 
 // ================================================================
 //  BORRAR ATLETA  /del_atleta?i=N
-//  Solo borra el nombre, sus lanzamientos quedan en RAM
 // ================================================================
 void handleDelAtleta() {
   if (server.hasArg("i")) {
     int idx = server.arg("i").toInt();
-    if (idx > 0 && idx < numAtletas) {  // no borrar Invitado (idx=0)
-      // Mover los siguientes una posicion atras
+    if (idx > 0 && idx < numAtletas) {
       for (int i=idx; i<numAtletas-1; i++)
         atletas[i] = atletas[i+1];
       numAtletas--;
-      // Ajustar referencias en lanzamientos
       for (int i=0;i<throwLogCount;i++) {
         if (throwLog[i].atletaIdx == idx)       throwLog[i].atletaIdx = 0;
         else if (throwLog[i].atletaIdx > idx)   throwLog[i].atletaIdx--;
@@ -644,8 +711,7 @@ void handleDelAtleta() {
 }
 
 // ================================================================
-//  CSV  /csv          → atleta activo
-//       /csv?a=Todos  → todos
+//  CSV
 // ================================================================
 void handleCSV() {
   int filter = atletaActivo;
@@ -663,6 +729,7 @@ void handleCSV() {
 String buildCSV(int filterAtleta) {
   String csv = "# LANCEA - Sesion de Lanzamientos\n";
   csv += "# Atleta: " + (filterAtleta==-999 ? String("Todos") : nombreActivo()) + "\n";
+  csv += "# Bateria: " + String(batVoltage,3) + " V | " + String(batPercent) + "%\n";
   csv += "num,Atleta,Velocidad,Angulo,Distancia,maxAccel,impulseTime,Energia,Potencia\n";
   for (int i=0;i<throwLogCount;i++) {
     ThrowRecord& r=throwLog[i];
@@ -678,25 +745,27 @@ String buildCSV(int filterAtleta) {
 }
 
 // ================================================================
-//  STATUS JSON
+//  STATUS JSON  — incluye bateria
 // ================================================================
 void handleStatus() {
   String json = "{";
-  json += "\"throws\":"+String(throwLogCount)+",";
-  json += "\"atleta_activo\":\""+nombreActivo()+"\",";
-  json += "\"num_atletas\":"+String(numAtletas)+",";
+  json += "\"throws\":"       + String(throwLogCount)  + ",";
+  json += "\"atleta_activo\":\"" + nombreActivo()      + "\",";
+  json += "\"num_atletas\":"  + String(numAtletas)     + ",";
   json += "\"estado\":\"";
   json += estadoActual==IMPULSO?"IMPULSO":estadoActual==PAUSA?"PAUSA":"IDLE";
-  json += "\",\"uptime_s\":"+String(millis()/1000)+",";
-  json += "\"buzzer_activo\":"+String(buzzerActive?"true":"false")+"}";
+  json += "\",";
+  json += "\"uptime_s\":"     + String(millis()/1000)  + ",";
+  json += "\"buzzer_activo\":" + String(buzzerActive?"true":"false") + ",";
+  json += "\"bat_v\":"        + String(batVoltage, 3)  + ",";
+  json += "\"bat_pct\":"      + String(batPercent)     + "}";
   server.send(200, "application/json", json);
 }
 
 // ================================================================
-//  RESET ATLETA ACTIVO  /reset
+//  RESET ATLETA ACTIVO
 // ================================================================
 void handleResetAtleta() {
-  // Elimina solo los lanzamientos del atleta activo
   int j=0;
   for (int i=0;i<throwLogCount;i++)
     if (throwLog[i].atletaIdx != atletaActivo)
@@ -707,7 +776,7 @@ void handleResetAtleta() {
 }
 
 // ================================================================
-//  RESET TOTAL  /resetall
+//  RESET TOTAL
 // ================================================================
 void handleResetAll() {
   throwLogCount=0; throwCount=0;
@@ -730,6 +799,8 @@ void publishThrow(double v,double a,double t,double d,double e,double p) {
   safePrint("Tiempo de impulso: "); safePrint(String(t,3)); safePrintln(" s");
   safePrint("Energia cinetica: ");  safePrint(String(e,2)); safePrintln(" J");
   safePrint("Potencia: ");          safePrint(String(p,2)); safePrintln(" W");
+  safePrint("Bateria: ");           safePrint(String(batVoltage,3)); safePrint(" V | ");
+  safePrint(String(batPercent));    safePrintln("%");
   safePrintln("THROW_END"); safePrintln("");
 }
 
