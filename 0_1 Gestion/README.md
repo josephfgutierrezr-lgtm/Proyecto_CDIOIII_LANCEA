@@ -29,8 +29,8 @@ El proyecto se divide en dos fases semestrales según los lineamientos académic
 | Semanas | Hito / Entregable | Estado |
 | :--- | :--- | :--- |
 | **1-4** | Adquisición de componentes y Setup inicial del ESP32. |🟢 Hecho |
-| **5-8** | Integración de sensores (IMU/Velocidad), detección de evento y Pantalla OLED. |  🟡 En proceso |
-| **9-12** | Implementación de almacenamiento local (MicroSD/SPIFFS). | 🔴 Pendiente |
+| **5-8** | Integración de sensores (IMU/Velocidad), detección de evento y Pantalla OLED. |  🟢 Hecho |
+| **9-12** | Implementación de almacenamiento local (MicroSD/SPIFFS). |🟢 Hecho |
 | **13-16** |Pruebas de campo, calibración de sensibilidad y documentación final. | 🔴 Pendiente |
 
 ### Fase 2: Conectividad y Servidor (Próximo Semestre)
