@@ -34,7 +34,7 @@ Estos criterios verifican que las dimensiones físicas y el ensamblaje del siste
 |---------|---|---|:---:|
 | TEST-HW-01 PCB | Ancho del sled | ≤ 20 mm | ✅ Pass |
 | TEST-HW-01 Dim. | Diámetro interno jabalina | ≥ 24 mm | ✅ Pass (25.2mm) |
-| TEST-HW-01 Chasis | Ajuste mecánico sin holgura | Sin sonido al agitar | ❌ WIP |
+| TEST-HW-01 Chasis | Ajuste mecánico sin holgura | Sin sonido al agitar | ✅ Pass |
 
 ### Sistema Integrado / Datos
 En esta sección se evalúa el desempeño del sistema completo en condiciones reales de uso, incluyendo autonomía energética y confiabilidad en la captura y almacenamiento de datos.
@@ -42,7 +42,7 @@ En esta sección se evalúa el desempeño del sistema completo en condiciones re
 | Test ID | Parámetro | Tolerancia Aceptable | Estado |
 |---------|---|---|:---:|
 | TEST-MC-01 Potencia | Autonomía en campo | ≥ 6 horas continuas | ✅ Pass (7h15m) |
-| TEST-MC-01 SD | Integridad de datos durante grabación | 0 huecos, 0 picos de ruido | ❌ WIP |
+| TEST-MC-01 SD | Integridad de datos durante grabación | 0 huecos, 0 picos de ruido |✅ Pass |
 
 ---
 
