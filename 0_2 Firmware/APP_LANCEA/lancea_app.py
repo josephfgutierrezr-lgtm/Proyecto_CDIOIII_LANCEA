@@ -23,9 +23,9 @@ BG_BASE   = "#070D14"
 BG_PANEL  = "#0B1520"
 BG_CARD   = "#0F1C2E"
 BG_HOVER  = "#132540"
-ACCENT1   = "#00C8FF"   # cian eléctrico
-ACCENT2   = "#F0A500"   # ámbar dorado
-ACCENT3   = "#00FF88"   # verde neón
+ACCENT1   = "#00C8FF"
+ACCENT2   = "#F0A500"
+ACCENT3   = "#00FF88"
 RED_ALERT = "#FF3B5C"
 TEXT_PRI  = "#E8F4FD"
 TEXT_SEC  = "#6B8BA4"
@@ -35,12 +35,11 @@ BORDER    = "#1A3050"
 # ── DIRECTORIO RAÍZ ───────────────────────────────────────────────────────────
 ROOT_DIR    = "LANCEA_DATA"
 ATHLETES    = os.path.join(ROOT_DIR, "atletas")
-SD_IMPORTS  = os.path.join(ROOT_DIR, "sd_imports")   # volcados desde tarjeta SD
+SD_IMPORTS  = os.path.join(ROOT_DIR, "sd_imports")
 CONFIG_FILE = os.path.join(ROOT_DIR, "config.json")
 
 
 def ensure_dirs():
-    """Crea la estructura de carpetas si no existe."""
     os.makedirs(ROOT_DIR,   exist_ok=True)
     os.makedirs(ATHLETES,   exist_ok=True)
     os.makedirs(SD_IMPORTS, exist_ok=True)
@@ -70,18 +69,10 @@ def save_config(cfg: dict):
         json.dump(cfg, f, indent=2, ensure_ascii=False)
 
 
-# ── IP del XIAO cuando el PC se conecta al hotspot LANCEA_AP ──────────────
 LANCEA_WIFI_IP = "192.168.4.1"
 
 
 def get_session_dirs(athlete_name: str) -> dict:
-    """Crea y devuelve la jerarquia de carpetas para la sesion del dia actual.
-
-    LANCEA_DATA/atletas/<nombre>/<YYYY-MM-DD>/
-        1_datos_crudos/
-        2_graficas/
-        3_analisis/
-    """
     safe = "".join(c for c in athlete_name if c.isalnum() or c in " _-").strip()
     date_str = datetime.now().strftime("%Y-%m-%d")
     base = os.path.join(ROOT_DIR, "atletas", safe, date_str)
@@ -95,8 +86,20 @@ def get_session_dirs(athlete_name: str) -> dict:
     return dirs
 
 
+def bat_color_hex(pct: int) -> str:
+    """Devuelve color hex según nivel de batería."""
+    if pct > 50: return ACCENT3
+    if pct > 20: return ACCENT2
+    return RED_ALERT
+
+
+def bat_bar_str(pct: int) -> str:
+    """Genera barra de texto (10 bloques) para batería."""
+    filled = pct // 10
+    return "█" * filled + "░" * (10 - filled)
+
+
 def generar_reporte_automatico(csv_path: str, athlete_name: str) -> str:
-    """Lee el CSV de sesion, genera estadisticas y exporta graficas PNG."""
     try:
         df = pd.read_csv(csv_path)
         if df.empty or len(df) < 1:
@@ -104,11 +107,9 @@ def generar_reporte_automatico(csv_path: str, athlete_name: str) -> str:
         dirs = get_session_dirs(athlete_name)
         session_id = datetime.now().strftime("%H%M%S")
 
-        # Estadisticas
         resumen = df.describe().round(3)
         resumen.to_csv(os.path.join(dirs["reports"], "estadisticas_" + session_id + ".csv"))
 
-        # Graficas
         plt.style.use("dark_background")
         n = len(df)
         cols_num = [c for c in ["Velocidad","Angulo","Distancia","maxAccel","Energia","Potencia"]
@@ -171,10 +172,9 @@ def generar_reporte_automatico(csv_path: str, athlete_name: str) -> str:
         return ""
 
 
-# ── COMPONENTES VISUALES REUTILIZABLES ────────────────────────────────────────
+# ── COMPONENTES VISUALES ───────────────────────────────────────────────────────
 
 class GlowLabel(ctk.CTkLabel):
-    """Label con pseudo-brillo usando borde de color."""
     pass
 
 
@@ -183,8 +183,7 @@ class SectionTitle(ctk.CTkLabel):
         super().__init__(
             parent, text=text.upper(),
             font=ctk.CTkFont(family="Consolas", size=11, weight="bold"),
-            text_color=TEXT_SEC, **kw
-        )
+            text_color=TEXT_SEC, **kw)
 
 
 class KPICard(ctk.CTkFrame):
@@ -193,15 +192,12 @@ class KPICard(ctk.CTkFrame):
             fg_color=BG_CARD, border_width=1, border_color=BORDER,
             corner_radius=8, **kw)
         self.accent = accent
-
         SectionTitle(self, label).pack(pady=(14, 4), padx=16, anchor="w")
-
         self.val_lbl = ctk.CTkLabel(
             self, text="–",
             font=ctk.CTkFont(family="Consolas", size=52, weight="bold"),
             text_color=accent)
         self.val_lbl.pack(padx=16, anchor="w")
-
         self.unit_lbl = ctk.CTkLabel(
             self, text=unit,
             font=ctk.CTkFont(family="Consolas", size=13),
@@ -210,6 +206,52 @@ class KPICard(ctk.CTkFrame):
 
     def set(self, value: str):
         self.val_lbl.configure(text=value)
+
+
+class BatteryWidget(ctk.CTkFrame):
+    """Widget de batería compacto para la barra lateral."""
+    def __init__(self, parent, **kw):
+        super().__init__(parent, fg_color=BG_CARD,
+            border_width=1, border_color=BORDER, corner_radius=8, **kw)
+
+        SectionTitle(self, "⚡  BATERIA").pack(padx=14, pady=(10, 4), anchor="w")
+
+        # Fila principal: porcentaje + voltaje
+        row = ctk.CTkFrame(self, fg_color="transparent")
+        row.pack(fill="x", padx=14, pady=(0, 4))
+
+        self.pct_label = ctk.CTkLabel(row, text="–%",
+            font=ctk.CTkFont(family="Consolas", size=28, weight="bold"),
+            text_color=ACCENT3)
+        self.pct_label.pack(side="left")
+
+        self.volt_label = ctk.CTkLabel(row, text="  –.– V",
+            font=ctk.CTkFont(family="Consolas", size=13),
+            text_color=TEXT_DIM)
+        self.volt_label.pack(side="left", pady=(8, 0))
+
+        # Barra de progreso
+        self.bar = ctk.CTkProgressBar(self,
+            fg_color=BG_BASE, progress_color=ACCENT3,
+            height=8, corner_radius=4)
+        self.bar.set(0)
+        self.bar.pack(fill="x", padx=14, pady=(0, 4))
+
+        self.bar_label = ctk.CTkLabel(self, text="░░░░░░░░░░  sin datos",
+            font=ctk.CTkFont(family="Consolas", size=10),
+            text_color=TEXT_DIM)
+        self.bar_label.pack(padx=14, pady=(0, 10), anchor="w")
+
+    def update_bat(self, pct: int, voltage: float):
+        color = bat_color_hex(pct)
+        bar_str = bat_bar_str(pct)
+        self.pct_label.configure(text=f"{pct}%", text_color=color)
+        self.volt_label.configure(text=f"  {voltage:.3f} V")
+        self.bar.set(pct / 100)
+        self.bar.configure(progress_color=color)
+        status = "CARGA BAJA" if pct <= 20 else ("MEDIA" if pct <= 50 else "OK")
+        self.bar_label.configure(
+            text=f"{bar_str}  {status}", text_color=color)
 
 
 class NavButton(ctk.CTkButton):
@@ -257,7 +299,7 @@ class LanceaApp(ctk.CTk):
         super().__init__()
         ensure_dirs()
 
-        self.title("LANCEA  ·  Intelligent Javelin Telemetry  ·  v3.0")
+        self.title("LANCEA  ·  Intelligent Javelin Telemetry  ·  v3.1")
         self.geometry("1440x900")
         self.minsize(1100, 720)
         self.configure(fg_color=BG_DEEP)
@@ -271,21 +313,22 @@ class LanceaApp(ctk.CTk):
         self.last_a = 0.0
         self._nav_btns: list[NavButton] = []
 
-        # ── Rutas de sesion activa ──────────────────────────────────────────
         self._session_csv_path = None
         self._session_ts = ""
 
-        # ── Estado de transferencia SD ──────────────────────────────────────
         self._sd_transfer_active = False
         self._sd_buffer: list[str] = []
         self._sd_file_path: str | None = None
 
-        # ── Sesión en vivo ───────────────────────────────────────────────────
-        self._session_throws: list[dict] = []   # lanzamientos de la sesión actual
-        self._live_buf: dict = {}               # bloque THROW acumulando
-        self._in_throw_block = False            # dentro de THROW_START…THROW_END
-        self._dump_active = False               # dentro de DUMP_START…DUMP_END
-        self._dump_rows: list[str] = []         # filas CSV del volcado
+        self._session_throws: list[dict] = []
+        self._live_buf: dict = {}
+        self._in_throw_block = False
+        self._dump_active = False
+        self._dump_rows: list[str] = []
+
+        # ── Estado de batería ──────────────────────────────────────────────
+        self._bat_pct: int   = 0
+        self._bat_v:   float = 0.0
 
         self._build_layout()
         self._show_live()
@@ -296,14 +339,12 @@ class LanceaApp(ctk.CTk):
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-        # SIDEBAR
         self.sidebar = ctk.CTkFrame(self, width=260, fg_color=BG_BASE,
             corner_radius=0, border_width=0)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
         self.sidebar.grid_propagate(False)
         self._build_sidebar()
 
-        # ÁREA CENTRAL
         self.main_area = ctk.CTkFrame(self, fg_color=BG_BASE,
             corner_radius=0, border_width=0)
         self.main_area.grid(row=0, column=1, sticky="nsew")
@@ -319,7 +360,6 @@ class LanceaApp(ctk.CTk):
     def _build_sidebar(self):
         sb = self.sidebar
 
-        # Logo area
         logo_frame = ctk.CTkFrame(sb, fg_color="transparent")
         logo_frame.pack(fill="x", padx=20, pady=(32, 8))
 
@@ -330,10 +370,8 @@ class LanceaApp(ctk.CTk):
             font=ctk.CTkFont(family="Consolas", size=9),
             text_color=TEXT_DIM).pack(anchor="w")
 
-        # Divider
         ctk.CTkFrame(sb, height=1, fg_color=BORDER).pack(fill="x", padx=20, pady=16)
 
-        # Atleta seleccionado
         ctk.CTkLabel(sb, text="ATLETA ACTIVO",
             font=ctk.CTkFont(family="Consolas", size=10, weight="bold"),
             text_color=TEXT_DIM).pack(padx=20, anchor="w")
@@ -347,12 +385,14 @@ class LanceaApp(ctk.CTk):
             dropdown_fg_color=BG_PANEL,
             text_color=TEXT_PRI, height=38, corner_radius=6)
         self.athlete_menu.set(self.current_athlete)
-        self.athlete_menu.pack(fill="x", padx=20, pady=(6, 20))
+        self.athlete_menu.pack(fill="x", padx=20, pady=(6, 16))
 
-        # Divider
+        # ── WIDGET DE BATERIA en sidebar ──────────────────────────────────
+        self.bat_widget = BatteryWidget(sb)
+        self.bat_widget.pack(fill="x", padx=20, pady=(0, 16))
+
         ctk.CTkFrame(sb, height=1, fg_color=BORDER).pack(fill="x", padx=20, pady=4)
 
-        # Navegación
         ctk.CTkLabel(sb, text="MÓDULOS",
             font=ctk.CTkFont(family="Consolas", size=10, weight="bold"),
             text_color=TEXT_DIM).pack(padx=20, pady=(16, 6), anchor="w")
@@ -369,12 +409,11 @@ class LanceaApp(ctk.CTk):
             btn.pack(fill="x", padx=12, pady=2)
             self._nav_btns.append(btn)
 
-        # Footer status
         ctk.CTkFrame(sb, height=1, fg_color=BORDER).pack(fill="x", padx=20, side="bottom", pady=16)
         self.status_badge = StatusBadge(sb)
         self.status_badge.pack(side="bottom", padx=20, pady=(0, 8), anchor="w")
 
-        version_lbl = ctk.CTkLabel(sb, text="LANCEA  ©  2025  /  v2.0",
+        version_lbl = ctk.CTkLabel(sb, text="LANCEA  ©  2025  /  v3.1",
             font=ctk.CTkFont(family="Consolas", size=9),
             text_color=TEXT_DIM)
         version_lbl.pack(side="bottom", padx=20, pady=(0, 4), anchor="w")
@@ -382,16 +421,11 @@ class LanceaApp(ctk.CTk):
     # ── FRAME TELEMETRÍA VIVO ──────────────────────────────────────────────────
 
     def _build_live_frame(self):
-        # grid de 4 filas — barra conexion SIEMPRE visible en row=0
-        # row=0  barra conexion (fija)
-        # row=1  KPIs        (fija)
-        # row=2  coach+console (expande)
-        # row=3  historial   (fija)
         self.live_frame = ctk.CTkFrame(self.main_area, fg_color="transparent")
         self.live_frame.grid_columnconfigure(0, weight=1)
         self.live_frame.grid_rowconfigure(2, weight=1)
 
-        # ── ROW 0  BARRA DE CONEXION ──────────────────────────────────────────
+        # ROW 0  BARRA DE CONEXION
         ctrl = ctk.CTkFrame(self.live_frame, fg_color=BG_PANEL,
             border_width=1, border_color=ACCENT1, corner_radius=8)
         ctrl.grid(row=0, column=0, padx=20, pady=(14,6), sticky="ew")
@@ -421,7 +455,12 @@ class LanceaApp(ctk.CTk):
         self.ts_label.pack(side="left", padx=4)
         self._update_clock()
 
-        # Botones derecha
+        # Indicador de batería compacto en la barra de conexión
+        self.live_bat_lbl = ctk.CTkLabel(ctrl, text="⚡ –%",
+            font=ctk.CTkFont(family="Consolas", size=11, weight="bold"),
+            text_color=TEXT_DIM)
+        self.live_bat_lbl.pack(side="left", padx=12)
+
         self.btn_serial = ctk.CTkButton(ctrl,
             text="CONECTAR ESP32",
             command=self._toggle_serial,
@@ -443,10 +482,10 @@ class LanceaApp(ctk.CTk):
             border_width=1, border_color=BORDER,
             height=34, corner_radius=6, width=68).pack(side="right", padx=4)
 
-        # ── ROW 1  KPIs ───────────────────────────────────────────────────────
+        # ROW 1  KPIs
         kpi_outer = ctk.CTkFrame(self.live_frame, fg_color="transparent")
         kpi_outer.grid(row=1, column=0, padx=20, pady=(0,6), sticky="ew")
-        for c in range(7):
+        for c in range(8):
             kpi_outer.columnconfigure(c, weight=1)
 
         self.kpi_vel  = KPICard(kpi_outer, "VELOCIDAD",  "m/s",  ACCENT1)
@@ -456,6 +495,8 @@ class LanceaApp(ctk.CTk):
         self.kpi_ener = KPICard(kpi_outer, "ENERGIA",    "J",    "#A855F7")
         self.kpi_pow  = KPICard(kpi_outer, "POTENCIA",   "W",    "#EC4899")
         self.kpi_raw  = KPICard(kpi_outer, "SESION",     "#",    TEXT_SEC)
+        # KPI de batería en la fila de KPIs
+        self.kpi_bat  = KPICard(kpi_outer, "BATERIA",    "%",    ACCENT3)
 
         self.kpi_vel.grid( row=0, column=0, padx=(0,3), sticky="nsew")
         self.kpi_ang.grid( row=0, column=1, padx=3,     sticky="nsew")
@@ -463,9 +504,10 @@ class LanceaApp(ctk.CTk):
         self.kpi_acel.grid(row=0, column=3, padx=3,     sticky="nsew")
         self.kpi_ener.grid(row=0, column=4, padx=3,     sticky="nsew")
         self.kpi_pow.grid( row=0, column=5, padx=3,     sticky="nsew")
-        self.kpi_raw.grid( row=0, column=6, padx=(3,0), sticky="nsew")
+        self.kpi_raw.grid( row=0, column=6, padx=3,     sticky="nsew")
+        self.kpi_bat.grid( row=0, column=7, padx=(3,0), sticky="nsew")
 
-        # ── ROW 2  COACH + CONSOLA (expande) ──────────────────────────────────
+        # ROW 2  COACH + CONSOLA
         mid = ctk.CTkFrame(self.live_frame, fg_color="transparent")
         mid.grid(row=2, column=0, padx=20, pady=(0,6), sticky="nsew")
         mid.columnconfigure(0, weight=1)
@@ -506,7 +548,7 @@ class LanceaApp(ctk.CTk):
         self.live_console.grid(
             row=1, column=0, padx=10, pady=(0,10), sticky="nsew")
 
-        # ── ROW 3  HISTORIAL DE SESION (fija abajo) ───────────────────────────
+        # ROW 3  HISTORIAL
         hist_outer = ctk.CTkFrame(self.live_frame, fg_color=BG_CARD,
             border_width=1, border_color=BORDER, corner_radius=8)
         hist_outer.grid(row=3, column=0, padx=20, pady=(0,14), sticky="ew")
@@ -537,19 +579,18 @@ class LanceaApp(ctk.CTk):
                 text_color=color).grid(
                 row=0, column=ci, padx=4, pady=2, sticky="ew")
         self._session_row_count = 0
+
     # ── FRAME ANALIZADOR ───────────────────────────────────────────────────────
 
     def _build_history_frame(self):
         self.history_frame = ctk.CTkFrame(self.main_area, fg_color="transparent")
 
-        # Header
         header = ctk.CTkFrame(self.history_frame, fg_color="transparent")
         header.pack(fill="x", padx=24, pady=(24, 16))
         ctk.CTkLabel(header, text="ANALIZADOR DE LANZAMIENTOS",
             font=ctk.CTkFont(family="Consolas", size=20, weight="bold"),
             text_color=TEXT_PRI).pack(side="left")
 
-        # Toolbar
         toolbar = ctk.CTkFrame(self.history_frame, fg_color=BG_PANEL,
             border_width=1, border_color=BORDER, corner_radius=8)
         toolbar.pack(fill="x", padx=24, pady=(0, 16))
@@ -592,7 +633,6 @@ class LanceaApp(ctk.CTk):
             text_color=TEXT_DIM)
         self.file_label.pack(side="left", padx=12)
 
-        # Content
         self.history_content = ctk.CTkFrame(self.history_frame,
             fg_color=BG_CARD, border_width=1, border_color=BORDER,
             corner_radius=8)
@@ -600,7 +640,6 @@ class LanceaApp(ctk.CTk):
         self.history_content.grid_columnconfigure(0, weight=1)
         self.history_content.grid_rowconfigure(0, weight=1)
 
-        # Placeholder
         placeholder = ctk.CTkFrame(self.history_content, fg_color="transparent")
         placeholder.pack(expand=True)
         ctk.CTkLabel(placeholder, text="◧",
@@ -620,7 +659,6 @@ class LanceaApp(ctk.CTk):
             font=ctk.CTkFont(family="Consolas", size=20, weight="bold"),
             text_color=TEXT_PRI).pack(side="left")
 
-        # Formulario nuevo atleta
         form = ctk.CTkFrame(self.config_frame, fg_color=BG_CARD,
             border_width=1, border_color=BORDER, corner_radius=8)
         form.pack(fill="x", padx=24, pady=(0, 16))
@@ -644,7 +682,6 @@ class LanceaApp(ctk.CTk):
             fg_color=ACCENT1, hover_color="#00A8D4", text_color="#000000",
             height=40, corner_radius=6, width=140).pack(side="left")
 
-        # Lista de atletas
         list_frame = ctk.CTkFrame(self.config_frame, fg_color=BG_CARD,
             border_width=1, border_color=BORDER, corner_radius=8)
         list_frame.pack(fill="both", expand=True, padx=24, pady=(0, 24))
@@ -713,7 +750,7 @@ class LanceaApp(ctk.CTk):
     def _process_line(self, line: str):
         s = line.strip()
 
-        # ── Protocolo SD (compatibilidad hacia atrás) ─────────────────────────
+        # Protocolo SD
         if s == "SD_START":
             self._sd_transfer_active = True; self._sd_buffer = []
             ts = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -734,7 +771,7 @@ class LanceaApp(ctk.CTk):
             self.sd_progress_lbl.configure(text=f"{n} líneas recibidas")
             self._log_console(line + "\n"); return
 
-        # ── Protocolo DUMP (historial RAM del ESP) ────────────────────────────
+        # Protocolo DUMP
         if s == "DUMP_START":
             self._dump_active = True; self._dump_rows = []
             self._log_console(line + "\n"); return
@@ -746,7 +783,7 @@ class LanceaApp(ctk.CTk):
             self._dump_rows.append(s)
             self._log_console(line + "\n"); return
 
-        # ── Bloque de lanzamiento THROW_START … THROW_END ─────────────────────
+        # Bloque THROW
         if s == "THROW_START":
             self._in_throw_block = True; self._live_buf = {}
             self._log_console("\n" + "─"*48 + "\n"); return
@@ -755,24 +792,19 @@ class LanceaApp(ctk.CTk):
             self._finalize_throw(self._live_buf)
             self._log_console("─"*48 + "\n"); return
 
-        # ── Línea LIVE: telemetría continua (no se loguea línea a línea) ──────
         if s.startswith("LIVE:"):
-            # no imprimir en consola — demasiado volumen
             return
 
-        # ── Línea informativa normal ───────────────────────────────────────────
         self._log_console(line + "\n")
 
-        # Escribir al log de sesión
         if self.log_file is None: self._start_log_file()
         if self.log_file:
             self.log_file.write(f"{line}\n"); self.log_file.flush()
 
-        # Acumular en bloque throw si estamos dentro
         if self._in_throw_block:
             self._parse_throw_field(line, self._live_buf)
 
-        # Actualizar KPIs en tiempo real
+        # Actualizar KPIs en tiempo real — incluye batería
         try:
             lo = line.lower()
             if "velocidad" in lo and ":" in line:
@@ -791,11 +823,51 @@ class LanceaApp(ctk.CTk):
                 self.kpi_ener.set(line.split(":")[1].split()[0])
             if "potencia" in lo and ":" in line:
                 self.kpi_pow.set(line.split(":")[1].split()[0])
+            # ── Batería desde serial ──────────────────────────────────────
+            if "[bat]" in lo and "v" in lo:
+                self._parse_bat_from_serial(line)
         except Exception:
             pass
 
+    def _parse_bat_from_serial(self, line: str):
+        """Parsea línea '[BAT] 3.847 V  →  70%' y actualiza widgets."""
+        try:
+            parts = line.split()
+            # Buscar voltaje (número antes de 'V')
+            v_idx = next(i for i, p in enumerate(parts) if p.upper() == "V")
+            voltage = float(parts[v_idx - 1])
+            # Buscar porcentaje (número seguido de '%')
+            pct_str = next(p for p in parts if p.endswith("%"))
+            pct = int(pct_str.replace("%", ""))
+            self._update_bat_ui(pct, voltage)
+        except Exception:
+            pass
+
+    def _update_bat_ui(self, pct: int, voltage: float):
+        """Actualiza todos los widgets de batería en la UI."""
+        self._bat_pct = pct
+        self._bat_v   = voltage
+        color = bat_color_hex(pct)
+        bar   = bat_bar_str(pct)
+
+        # Sidebar widget
+        self.bat_widget.update_bat(pct, voltage)
+
+        # KPI card en telemetría
+        self.kpi_bat.set(str(pct))
+        self.kpi_bat.val_lbl.configure(text_color=color)
+
+        # Label compacto en barra de conexión
+        self.live_bat_lbl.configure(
+            text=f"⚡ {pct}% ({voltage:.2f}V)",
+            text_color=color)
+
+        # Alerta si batería baja
+        if pct <= 15:
+            self._log_console(
+                f"[⚠ BATERIA BAJA] {pct}% · {voltage:.3f} V — Recarga pronto\n")
+
     def _parse_throw_field(self, line: str, buf: dict):
-        """Extrae clave:valor de una línea y la guarda en buf."""
         try:
             if ":" in line:
                 k, v = line.split(":", 1)
@@ -804,7 +876,6 @@ class LanceaApp(ctk.CTk):
             pass
 
     def _finalize_throw(self, buf: dict):
-        """Llamado al recibir THROW_END. Guarda en sesión y actualiza tabla."""
         if not buf: return
         try:
             rec = {
@@ -817,6 +888,15 @@ class LanceaApp(ctk.CTk):
                 "energia cinetica":   float(buf.get("energia cinetica",   0)),
                 "potencia":    float(buf.get("potencia",    0)),
             }
+            # Capturar batería si fue incluida en el bloque THROW
+            if "bateria" in buf:
+                try:
+                    bat_parts = buf["bateria"].replace("v","").replace("%","").split("|")
+                    self._update_bat_ui(
+                        int(bat_parts[1].strip()),
+                        float(bat_parts[0].strip()))
+                except Exception:
+                    pass
         except Exception:
             return
         self._session_throws.append(rec)
@@ -826,8 +906,7 @@ class LanceaApp(ctk.CTk):
         self._generar_reporte_sesion()
 
     def _add_session_row(self, rec: dict):
-        """Añade una fila a la tabla de historial de sesión en la UI."""
-        r = self._session_row_count + 1   # fila 0 es cabecera
+        r = self._session_row_count + 1
         self._session_row_count += 1
         vals = [
             (str(rec["num"]),                         TEXT_DIM),
@@ -845,7 +924,6 @@ class LanceaApp(ctk.CTk):
                 text_color=color).grid(row=r, column=ci, padx=4, pady=1, sticky="ew")
 
     def _save_throw_to_log(self, rec: dict):
-        """Guarda el lanzamiento en .log y acumula fila en CSV de sesion."""
         if self.log_file is None: self._start_log_file()
         if self.log_file:
             parts = [
@@ -856,6 +934,7 @@ class LanceaApp(ctk.CTk):
                 " | Acel=", "{:.2f}".format(rec["aceleracion maxima"]),
                 " | E=",    "{:.2f}".format(rec["energia cinetica"]), " J",
                 " | P=",    "{:.2f}".format(rec["potencia"]),      " W",
+                " | Bat=",  "{:.0f}".format(self._bat_pct),        "%",
             ]
             self.log_file.write("".join(parts) + chr(10))
             self.log_file.flush()
@@ -885,7 +964,6 @@ class LanceaApp(ctk.CTk):
                 print("[CSV] Error: " + str(e))
 
     def _generar_reporte_sesion(self):
-        """Lanza generar_reporte_automatico en hilo para no bloquear la UI."""
         csv_path = getattr(self, "_session_csv_path", None)
         if not csv_path or not os.path.exists(csv_path):
             return
@@ -899,7 +977,6 @@ class LanceaApp(ctk.CTk):
         threading.Thread(target=_run, daemon=True).start()
 
     def _request_dump(self):
-        """Envía el comando DUMP al ESP32."""
         if not self.is_reading or self.serial_port is None:
             messagebox.showwarning("Sin enlace", "Conecta el ESP32 primero.")
             return
@@ -910,7 +987,6 @@ class LanceaApp(ctk.CTk):
             messagebox.showerror("Error", str(e))
 
     def _request_reset(self):
-        """Envía RESET al ESP32 y limpia la tabla de sesión local."""
         if not self.is_reading or self.serial_port is None:
             messagebox.showwarning("Sin enlace", "Conecta el ESP32 primero.")
             return
@@ -929,18 +1005,14 @@ class LanceaApp(ctk.CTk):
             messagebox.showerror("Error", str(e))
 
     def _go_to_session_analysis(self):
-        """Lleva al analizador con los datos de la sesión actual."""
         if not self._session_throws:
             messagebox.showinfo("Sin datos", "No hay lanzamientos en la sesión actual.")
             return
-        import pandas as pd
         df = pd.DataFrame(self._session_throws)
         self._show_history()
         self._render_session_df(df)
 
     def _process_dump(self):
-        """Procesa las filas CSV recibidas del DUMP."""
-        import pandas as pd, io
         rows = [r for r in self._dump_rows if r.startswith("CSV_ROW:")]
         hdr  = next((r for r in self._dump_rows if r.startswith("CSV_HEADER:")), None)
         if not rows or not hdr: return
@@ -948,7 +1020,6 @@ class LanceaApp(ctk.CTk):
         data = [r.replace("CSV_ROW:", "").split(",") for r in rows]
         try:
             df = pd.DataFrame(data, columns=cols).apply(pd.to_numeric, errors="coerce")
-            # Fusionar con sesión local si hay datos nuevos
             for _, row in df.iterrows():
                 rec = {c: row[c] for c in df.columns}
                 rec["num"] = int(rec.get("num", 0))
@@ -956,7 +1027,6 @@ class LanceaApp(ctk.CTk):
                     self._session_throws.append(rec)
                     self._add_session_row(rec)
             self._log_console(f"[DUMP] {len(rows)} lanzamientos recibidos.\n")
-            # Mostrar análisis automáticamente
             self._show_history()
             self._render_session_df(df)
         except Exception as e:
@@ -967,7 +1037,6 @@ class LanceaApp(ctk.CTk):
         self.live_console.see("end")
 
     def _sd_flush_to_file(self):
-        """Guarda el buffer SD acumulado a disco."""
         if not self._sd_file_path or not self._sd_buffer:
             return
         try:
@@ -1028,14 +1097,12 @@ class LanceaApp(ctk.CTk):
             msg = "↩  REVISAR TÉCNICA"
             sub = f"Ángulo {a:.1f}°  ·  velocidad {v:.1f} m/s"
             color = RED_ALERT
-
         self.feedback_text.configure(text=msg, text_color=color)
         self.coach_sub.configure(text=sub)
 
-    # ── IMPORTAR DESDE LANCEA WiFi ────────────────────────────────────────────
+    # ── WiFi PANEL ─────────────────────────────────────────────────────────────
 
     def _import_from_wifi(self):
-        """PC conectado a LANCEA_AP -> descarga CSV -> analiza directo."""
         import urllib.request, urllib.error, io
         ip = self.wifi_ip_entry.get().strip() or LANCEA_WIFI_IP
         self.wifi_status_lbl.configure(text="Conectando...", text_color=ACCENT2)
@@ -1043,16 +1110,20 @@ class LanceaApp(ctk.CTk):
 
         def _run():
             try:
-                # Estado del dispositivo
                 try:
                     with urllib.request.urlopen("http://" + ip + "/status", timeout=3) as r:
                         import json as _j
                         info = _j.loads(r.read().decode())
                         n_throws = info.get("throws", "?")
+                        # Actualizar batería desde /status si está disponible
+                        bat_v   = info.get("bat_v",   None)
+                        bat_pct = info.get("bat_pct", None)
+                        if bat_v is not None and bat_pct is not None:
+                            self.after(0, lambda v=float(bat_v), p=int(bat_pct):
+                                self._update_bat_ui(p, v))
                 except Exception:
                     n_throws = "?"
 
-                # Descargar CSV
                 with urllib.request.urlopen("http://" + ip + "/csv", timeout=5) as r:
                     raw = r.read().decode("utf-8")
 
@@ -1062,13 +1133,10 @@ class LanceaApp(ctk.CTk):
                         "El dispositivo no tiene lanzamientos todavia."))
                     return
 
-                # Guardar CSV
                 dirs = get_session_dirs(self.current_athlete)
                 ts = datetime.now().strftime("%Y%m%d_%H%M%S")
                 save_path = os.path.join(dirs["raw"], "wifi_import_" + ts + ".csv")
                 df.to_csv(save_path, index=False)
-
-                # Reporte en hilo (no bloquea)
                 generar_reporte_automatico(save_path, self.current_athlete)
 
                 n_str = str(n_throws)
@@ -1085,7 +1153,6 @@ class LanceaApp(ctk.CTk):
         threading.Thread(target=_run, daemon=True).start()
 
     def _wifi_done(self, ok: bool, msg: str, df=None, path: str = ""):
-        """Callback en hilo principal tras importacion WiFi."""
         try:
             self.wifi_ip_entry.configure(state="normal")
         except Exception:
@@ -1099,10 +1166,8 @@ class LanceaApp(ctk.CTk):
             messagebox.showerror("LANCEA WiFi", msg)
 
     def _wifi_render(self, df, path: str = ""):
-        """Renderiza datos WiFi una vez el frame del analizador esta visible."""
         if df is None or df.empty:
             return
-        # Normalizar nombres de columnas (el CSV puede tener minusculas)
         col_map = {
             "velocidad":"Velocidad","angulo":"Angulo","distancia":"Distancia",
             "maxaccel":"maxAccel","impulsetime":"impulseTime",
@@ -1116,7 +1181,7 @@ class LanceaApp(ctk.CTk):
             w.destroy()
         self._render_session_df(df)
 
-    # ── ANALIZADOR DE ARCHIVOS ─────────────────────────────────────────────────
+    # ── ANALIZADOR ─────────────────────────────────────────────────────────────
 
     def _analyze_file(self):
         path = filedialog.askopenfilename(
@@ -1138,7 +1203,6 @@ class LanceaApp(ctk.CTk):
         self.file_label.configure(text=f"  ◫  {os.path.basename(path)}")
         for w in self.history_content.winfo_children():
             w.destroy()
-
         try:
             df = pd.read_csv(path, sep=None, engine="python",
                              comment="#", on_bad_lines="skip")
@@ -1150,7 +1214,6 @@ class LanceaApp(ctk.CTk):
             self._render_text_log(path)
 
     def _render_session_df(self, df):
-        """Muestra análisis de la sesión actual (DataFrame de lanzamientos)."""
         for w in self.history_content.winfo_children():
             w.destroy()
 
@@ -1159,10 +1222,9 @@ class LanceaApp(ctk.CTk):
         container.columnconfigure((0,1,2,3), weight=1)
         container.rowconfigure(1, weight=1)
 
-        # KPIs de sesión
         krow = ctk.CTkFrame(container, fg_color="transparent")
         krow.grid(row=0, column=0, columnspan=4, sticky="ew", pady=(0,10))
-        krow.columnconfigure((0,1,2,3,4,6), weight=1)
+        krow.columnconfigure((0,1,2,3,4,5,6), weight=1)
 
         def sk(parent, title, val, unit, color, col):
             c = ctk.CTkFrame(parent, fg_color=BG_BASE, border_width=1,
@@ -1188,8 +1250,6 @@ class LanceaApp(ctk.CTk):
         sk(krow, "ENERGÍA MÁX",    safe("Energia",   max),               "J",    "#A855F7",5)
         sk(krow, "POTENCIA MÁX",   safe("Potencia",  max),               "W",    "#EC4899",6)
 
-        # Gráficas
-        import matplotlib
         fig = Figure(figsize=(12, 5), facecolor=BG_BASE, tight_layout=True)
         axes = [fig.add_subplot(2, 3, i+1) for i in range(6)]
         plots = [
@@ -1204,7 +1264,6 @@ class LanceaApp(ctk.CTk):
             ax = axes[i]
             ax.set_facecolor(BG_PANEL)
             colname = col
-            # buscar variante case-insensitive
             for c in df.columns:
                 if c.lower() == col.lower():
                     colname = c; break
@@ -1222,15 +1281,12 @@ class LanceaApp(ctk.CTk):
         canvas = FigureCanvasTkAgg(fig, container)
         canvas.draw()
         canvas.get_tk_widget().grid(row=1, column=0, columnspan=4, sticky="nsew")
-
         self.file_label.configure(text=f"  ◈  Sesión activa · {len(df)} lanzamientos")
 
     def _render_text_log(self, path: str):
-        """Renderiza un LOG de texto con resumen de KPIs extraídos."""
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             lines = f.readlines()
 
-        # Extraer métricas
         velocidades, angulos, distancias = [], [], []
         for line in lines:
             lo = line.lower()
@@ -1249,7 +1305,6 @@ class LanceaApp(ctk.CTk):
         container.columnconfigure((0, 1), weight=1)
         container.rowconfigure(1, weight=1)
 
-        # KPI cards de resumen
         summary = ctk.CTkFrame(container, fg_color="transparent")
         summary.grid(row=0, column=0, columnspan=2, sticky="ew", pady=(0, 12))
         summary.columnconfigure((0, 1, 2), weight=1)
@@ -1274,7 +1329,6 @@ class LanceaApp(ctk.CTk):
         mini_kpi(summary, "ÁNGULO PROMEDIO",      a_avg, "°",   ACCENT2, 1)
         mini_kpi(summary, "DISTANCIA MÁX",        d_max, "m",   ACCENT3, 2)
 
-        # Textbox con el log
         txt = ctk.CTkTextbox(container,
             font=ctk.CTkFont(family="Consolas", size=12),
             fg_color=BG_BASE, text_color=ACCENT3,
@@ -1285,12 +1339,10 @@ class LanceaApp(ctk.CTk):
         txt.configure(state="disabled")
 
     def _render_sensor_plot(self, df: pd.DataFrame, path: str):
-        """Gráfica de datos de sensor con fondo oscuro y estilo LANCEA."""
         fig = Figure(figsize=(10, 5), facecolor=BG_BASE, tight_layout=True)
         ax = fig.add_subplot(111)
         ax.set_facecolor(BG_PANEL)
 
-        # Determinar columnas
         ax_col = "Ax" if "Ax" in df.columns else "ax"
         ay_col = "Ay" if "Ay" in df.columns else "ay"
         az_col = "Az" if "Az" in df.columns else "az"
@@ -1316,26 +1368,20 @@ class LanceaApp(ctk.CTk):
         for spine in ax.spines.values():
             spine.set_edgecolor(BORDER)
         ax.grid(color=BORDER, linestyle="--", alpha=0.5)
-        legend = ax.legend(facecolor=BG_CARD, edgecolor=BORDER, labelcolor=TEXT_PRI,
+        ax.legend(facecolor=BG_CARD, edgecolor=BORDER, labelcolor=TEXT_PRI,
             fontsize=10, framealpha=0.9)
 
         canvas = FigureCanvasTkAgg(fig, self.history_content)
         canvas.draw()
         canvas.get_tk_widget().pack(fill="both", expand=True, padx=8, pady=8)
 
-    # ── FRAME WiFi · PANEL & ATLETAS ──────────────────────────────────────────
+    # ── FRAME WiFi PANEL ───────────────────────────────────────────────────────
 
     def _build_wifi_frame(self):
-        """Panel WiFi con 3 filas fijas:
-        row=0  barra IP + botones (fija)
-        row=1  panel izquierdo: atletas | panel derecho: tabla lanzamientos (expande)
-        row=2  barra de estado (fija)
-        """
         self.wifi_frame = ctk.CTkFrame(self.main_area, fg_color="transparent")
         self.wifi_frame.grid_columnconfigure(0, weight=1)
         self.wifi_frame.grid_rowconfigure(1, weight=1)
 
-        # ── ROW 0  BARRA DE CONEXION WiFi ─────────────────────────────────
         top = ctk.CTkFrame(self.wifi_frame, fg_color=BG_PANEL,
             border_width=1, border_color=ACCENT1, corner_radius=8)
         top.grid(row=0, column=0, padx=20, pady=(14,6), sticky="ew")
@@ -1344,8 +1390,7 @@ class LanceaApp(ctk.CTk):
             font=ctk.CTkFont(family="Consolas", size=13, weight="bold"),
             text_color=ACCENT1).pack(side="left", padx=(14,8), pady=10)
 
-        ctk.CTkFrame(top, width=1, fg_color=BORDER).pack(
-            side="left", fill="y", pady=8)
+        ctk.CTkFrame(top, width=1, fg_color=BORDER).pack(side="left", fill="y", pady=8)
 
         ctk.CTkLabel(top, text="IP:",
             font=ctk.CTkFont(family="Consolas", size=11),
@@ -1377,19 +1422,23 @@ class LanceaApp(ctk.CTk):
             border_width=1, border_color=RED_ALERT,
             height=32, corner_radius=6, width=100).pack(side="right", padx=(4,14))
 
+        # Indicador de batería en barra WiFi
+        self.wifi_bat_lbl = ctk.CTkLabel(top, text="⚡ –%  –.–V",
+            font=ctk.CTkFont(family="Consolas", size=11, weight="bold"),
+            text_color=TEXT_DIM)
+        self.wifi_bat_lbl.pack(side="right", padx=12)
+
         self.wifi_panel_status = ctk.CTkLabel(top, text="Sin conexion",
             font=ctk.CTkFont(family="Consolas", size=10),
             text_color=TEXT_DIM)
         self.wifi_panel_status.pack(side="right", padx=8)
 
-        # ── ROW 1  CONTENIDO: atletas + lanzamientos ──────────────────────
         body = ctk.CTkFrame(self.wifi_frame, fg_color="transparent")
         body.grid(row=1, column=0, padx=20, pady=(0,6), sticky="nsew")
         body.grid_columnconfigure(0, weight=1)
         body.grid_columnconfigure(1, weight=2)
         body.grid_rowconfigure(0, weight=1)
 
-        # ── Panel ATLETAS (izquierda) ──────────────────────────────────────
         left = ctk.CTkFrame(body, fg_color=BG_CARD,
             border_width=1, border_color=BORDER, corner_radius=8)
         left.grid(row=0, column=0, padx=(0,8), sticky="nsew")
@@ -1399,7 +1448,6 @@ class LanceaApp(ctk.CTk):
         SectionTitle(left, "ATLETAS EN DISPOSITIVO").grid(
             row=0, column=0, padx=14, pady=(12,6), sticky="w")
 
-        # Formulario nuevo atleta
         add_row = ctk.CTkFrame(left, fg_color="transparent")
         add_row.grid(row=1, column=0, padx=12, pady=(0,8), sticky="ew")
         add_row.columnconfigure(0, weight=1)
@@ -1417,45 +1465,37 @@ class LanceaApp(ctk.CTk):
             fg_color=ACCENT3, hover_color="#00CC6E", text_color="#000000",
             height=32, corner_radius=6, width=36).grid(row=0, column=1)
 
-        # Lista de atletas
         self.wifi_athlete_list = ctk.CTkScrollableFrame(left,
-            fg_color=BG_BASE, scrollbar_button_color=BG_HOVER,
-            corner_radius=6)
-        self.wifi_athlete_list.grid(
-            row=2, column=0, padx=10, pady=(0,10), sticky="nsew")
+            fg_color=BG_BASE, scrollbar_button_color=BG_HOVER, corner_radius=6)
+        self.wifi_athlete_list.grid(row=2, column=0, padx=10, pady=(0,10), sticky="nsew")
 
-        # ── Panel LANZAMIENTOS (derecha) ───────────────────────────────────
         right = ctk.CTkFrame(body, fg_color=BG_CARD,
             border_width=1, border_color=BORDER, corner_radius=8)
         right.grid(row=0, column=1, sticky="nsew")
         right.grid_rowconfigure(1, weight=1)
         right.grid_columnconfigure(0, weight=1)
 
-        # Header derecha con badges
         right_top = ctk.CTkFrame(right, fg_color="transparent")
         right_top.grid(row=0, column=0, padx=14, pady=(12,4), sticky="ew")
         self.wifi_throws_title = SectionTitle(right_top, "LANZAMIENTOS")
         self.wifi_throws_title.pack(side="left")
 
-        # Badges KPI
-        self.wifi_badge_v   = ctk.CTkLabel(right_top, text="",
+        self.wifi_badge_v = ctk.CTkLabel(right_top, text="",
             font=ctk.CTkFont(family="Consolas", size=11, weight="bold"),
             text_color=ACCENT1)
         self.wifi_badge_v.pack(side="right", padx=6)
-        self.wifi_badge_d   = ctk.CTkLabel(right_top, text="",
+        self.wifi_badge_d = ctk.CTkLabel(right_top, text="",
             font=ctk.CTkFont(family="Consolas", size=11, weight="bold"),
             text_color=ACCENT3)
         self.wifi_badge_d.pack(side="right", padx=6)
-        self.wifi_badge_a   = ctk.CTkLabel(right_top, text="",
+        self.wifi_badge_a = ctk.CTkLabel(right_top, text="",
             font=ctk.CTkFont(family="Consolas", size=11, weight="bold"),
             text_color=ACCENT2)
         self.wifi_badge_a.pack(side="right", padx=6)
 
-        # Tabla lanzamientos
         self.wifi_throws_scroll = ctk.CTkScrollableFrame(right,
             fg_color=BG_BASE, scrollbar_button_color=BG_HOVER, corner_radius=6)
-        self.wifi_throws_scroll.grid(
-            row=1, column=0, padx=10, pady=(0,10), sticky="nsew")
+        self.wifi_throws_scroll.grid(row=1, column=0, padx=10, pady=(0,10), sticky="nsew")
         self.wifi_throws_scroll.columnconfigure((0,1,2,3,4,5,6,7), weight=1)
 
         for ci, (lbl, color) in enumerate([
@@ -1465,10 +1505,8 @@ class LanceaApp(ctk.CTk):
         ]):
             ctk.CTkLabel(self.wifi_throws_scroll, text=lbl,
                 font=ctk.CTkFont(family="Consolas", size=10, weight="bold"),
-                text_color=color).grid(
-                row=0, column=ci, padx=4, pady=2, sticky="ew")
+                text_color=color).grid(row=0, column=ci, padx=4, pady=2, sticky="ew")
 
-        # ── ROW 2  BARRA DE ESTADO ─────────────────────────────────────────
         bot = ctk.CTkFrame(self.wifi_frame, fg_color=BG_PANEL,
             border_width=1, border_color=BORDER, corner_radius=6)
         bot.grid(row=2, column=0, padx=20, pady=(0,14), sticky="ew")
@@ -1483,18 +1521,14 @@ class LanceaApp(ctk.CTk):
             text_color=ACCENT2)
         self.wifi_atleta_activo_lbl.pack(side="right", padx=14, pady=6)
 
-        # Estado interno
-        self._wifi_panel_athletes = []    # lista de nombres recibida del ESP
-        self._wifi_panel_active   = -1    # indice activo
-        self._wifi_panel_throws   = []    # lanzamientos recibidos
-
-    # ── METODOS WiFi PANEL ─────────────────────────────────────────────────────
+        self._wifi_panel_athletes = []
+        self._wifi_panel_active   = -1
+        self._wifi_panel_throws   = []
 
     def _wifi_get_ip(self) -> str:
         return self.wifi_panel_ip.get().strip() or LANCEA_WIFI_IP
 
     def _wifi_panel_refresh(self):
-        """Consulta /status y /csv al ESP para actualizar el panel."""
         import urllib.request, urllib.error
         ip = self._wifi_get_ip()
         self.wifi_panel_status.configure(text="Conectando...", text_color=ACCENT2)
@@ -1503,23 +1537,14 @@ class LanceaApp(ctk.CTk):
         def _run():
             try:
                 import json as _j, io
-                # Estado
-                with urllib.request.urlopen(
-                        "http://" + ip + "/status", timeout=3) as r:
+                with urllib.request.urlopen("http://" + ip + "/status", timeout=3) as r:
                     info = _j.loads(r.read().decode())
-
-                # CSV de todos los atletas
-                with urllib.request.urlopen(
-                        "http://" + ip + "/csv?a=Todos", timeout=5) as r:
+                with urllib.request.urlopen("http://" + ip + "/csv?a=Todos", timeout=5) as r:
                     raw_csv = r.read().decode("utf-8")
-
-                self.after(0, lambda i=info, c=raw_csv:
-                    self._wifi_panel_update(i, c))
-
+                self.after(0, lambda i=info, c=raw_csv: self._wifi_panel_update(i, c))
             except urllib.error.URLError:
                 self.after(0, lambda: self.wifi_panel_status.configure(
-                    text="Sin conexion — verifica LANCEA_AP",
-                    text_color=RED_ALERT))
+                    text="Sin conexion — verifica LANCEA_AP", text_color=RED_ALERT))
             except Exception as e:
                 self.after(0, lambda m=str(e): self.wifi_panel_status.configure(
                     text="Error: " + m, text_color=RED_ALERT))
@@ -1527,23 +1552,32 @@ class LanceaApp(ctk.CTk):
         threading.Thread(target=_run, daemon=True).start()
 
     def _wifi_panel_update(self, info: dict, raw_csv: str):
-        """Actualiza la UI con los datos recibidos del ESP."""
         import io
-        # Status bar
         estado  = info.get("estado", "?")
         atleta  = info.get("atleta_activo", "?")
         n       = info.get("throws", 0)
+
+        # Actualizar batería desde /status
+        bat_v   = info.get("bat_v",   None)
+        bat_pct = info.get("bat_pct", None)
+        if bat_v is not None and bat_pct is not None:
+            pct = int(bat_pct); v = float(bat_v)
+            self._update_bat_ui(pct, v)
+            color = bat_color_hex(pct)
+            bar   = bat_bar_str(pct)
+            self.wifi_bat_lbl.configure(
+                text=f"⚡ {bar} {pct}%  {v:.2f}V",
+                text_color=color)
+
         self.wifi_panel_status.configure(
             text="Conectado | " + str(n) + " lanzamientos | " + estado,
             text_color=ACCENT3)
-        self.wifi_atleta_activo_lbl.configure(
-            text="Activo: " + atleta)
+        self.wifi_atleta_activo_lbl.configure(text="Activo: " + atleta)
         self.wifi_estado_lbl.configure(
             text="Estado ESP: " + estado + " | uptime: " +
                  str(info.get("uptime_s","?")) + " s",
             text_color=TEXT_DIM if estado=="IDLE" else ACCENT2)
 
-        # Parsear CSV
         try:
             df = pd.read_csv(io.StringIO(raw_csv), comment="#", on_bad_lines="skip")
         except Exception:
@@ -1551,21 +1585,16 @@ class LanceaApp(ctk.CTk):
 
         self._wifi_panel_throws = df
 
-        # Extraer lista de atletas del CSV
         if not df.empty and "Atleta" in df.columns:
             athletes = list(df["Atleta"].dropna().unique())
         else:
             athletes = [atleta] if atleta != "?" else ["Invitado"]
 
-        # Guardar activo para resaltarlo
         self._wifi_panel_active_name = atleta
         self._wifi_refresh_athlete_list(athletes, atleta)
-
-        # Mostrar throws del atleta activo
         self._wifi_refresh_throws(df, atleta)
 
     def _wifi_refresh_athlete_list(self, athletes: list, active_name: str):
-        """Redibuja la lista de atletas en el panel izquierdo."""
         for w in self.wifi_athlete_list.winfo_children():
             w.destroy()
 
@@ -1594,13 +1623,6 @@ class LanceaApp(ctk.CTk):
                 ).pack(side="right", padx=8, pady=6)
 
     def _wifi_refresh_throws(self, df, athlete_name: str):
-        """Redibuja la tabla de lanzamientos del atleta activo."""
-        # Limpiar filas anteriores (mantener cabecera fila 0)
-        for w in self.wifi_throws_scroll.winfo_children():
-            if hasattr(w, '_wifi_row'):
-                w.destroy()
-
-        # Limpiar todo y redibujar cabecera + datos
         for w in self.wifi_throws_scroll.winfo_children():
             w.destroy()
 
@@ -1611,23 +1633,18 @@ class LanceaApp(ctk.CTk):
         ]):
             ctk.CTkLabel(self.wifi_throws_scroll, text=lbl,
                 font=ctk.CTkFont(family="Consolas", size=10, weight="bold"),
-                text_color=color).grid(
-                row=0, column=ci, padx=4, pady=2, sticky="ew")
+                text_color=color).grid(row=0, column=ci, padx=4, pady=2, sticky="ew")
 
         if df is None or df.empty:
-            ctk.CTkLabel(self.wifi_throws_scroll,
-                text="Sin lanzamientos",
+            ctk.CTkLabel(self.wifi_throws_scroll, text="Sin lanzamientos",
                 font=ctk.CTkFont(family="Consolas", size=11),
-                text_color=TEXT_DIM).grid(
-                row=1, column=0, columnspan=8, pady=16)
-            self.wifi_throws_title.configure(
-                text=("LANZAMIENTOS — " + athlete_name).upper())
+                text_color=TEXT_DIM).grid(row=1, column=0, columnspan=8, pady=16)
+            self.wifi_throws_title.configure(text=("LANZAMIENTOS — " + athlete_name).upper())
             self.wifi_badge_v.configure(text="")
             self.wifi_badge_a.configure(text="")
             self.wifi_badge_d.configure(text="")
             return
 
-        # Filtrar por atleta
         if "Atleta" in df.columns:
             df_f = df[df["Atleta"] == athlete_name]
         else:
@@ -1638,7 +1655,6 @@ class LanceaApp(ctk.CTk):
         df_f = df_f.rename(columns={c: col_map.get(c.lower(),c) for c in df_f.columns})
         df_f = df_f.apply(pd.to_numeric, errors="coerce")
 
-        # Actualizar titulo y badges
         n = len(df_f)
         self.wifi_throws_title.configure(
             text=("LANZAMIENTOS — " + athlete_name + " (" + str(n) + ")").upper())
@@ -1656,7 +1672,6 @@ class LanceaApp(ctk.CTk):
             self.wifi_badge_a.configure(text="")
             self.wifi_badge_d.configure(text="")
 
-        # Filas
         for ri, (_, row) in enumerate(df_f.iterrows()):
             r = ri + 1
             ang = row.get("Angulo", 0)
@@ -1664,7 +1679,7 @@ class LanceaApp(ctk.CTk):
             ang_label = "Optimo" if 32<=ang<=39 else ("Bajo" if ang<32 else "Alto")
 
             vals = [
-                (str(int(row.get("num", ri+1))),      TEXT_DIM),
+                (str(int(row.get("num", ri+1))),         TEXT_DIM),
                 ("{:.2f}".format(row.get("Velocidad",0)), ACCENT1),
                 ("{:.1f}".format(row.get("Angulo",0)),    ACCENT2),
                 ("{:.2f}".format(row.get("Distancia",0)), ACCENT3),
@@ -1676,34 +1691,21 @@ class LanceaApp(ctk.CTk):
             for ci, (txt, color) in enumerate(vals):
                 ctk.CTkLabel(self.wifi_throws_scroll, text=txt,
                     font=ctk.CTkFont(family="Consolas", size=11),
-                    text_color=color).grid(
-                    row=r, column=ci, padx=4, pady=1, sticky="ew")
+                    text_color=color).grid(row=r, column=ci, padx=4, pady=1, sticky="ew")
 
     def _wifi_select_athlete(self, name: str):
-        """Envía POST /add_atleta (ya existe) + GET /set_atleta al ESP."""
         import urllib.request, urllib.error, urllib.parse
         ip = self._wifi_get_ip()
 
         def _run():
             try:
-                # Buscar el indice del atleta en la lista actual
-                # Usamos status para obtener la lista actualizada
                 import json as _j
-                with urllib.request.urlopen(
-                        "http://" + ip + "/status", timeout=3) as r:
+                with urllib.request.urlopen("http://" + ip + "/status", timeout=3) as r:
                     info = _j.loads(r.read().decode())
-
-                # El ESP no expone indice directamente, usamos la pagina /atletas
-                # que acepta /set_atleta?i=N — necesitamos el indice
-                # Como workaround: hacemos POST /add_atleta con el nombre
-                # (si ya existe devuelve su indice y lo activa)
                 data = urllib.parse.urlencode({"nombre": name}).encode()
-                req  = urllib.request.Request(
-                    "http://" + ip + "/add_atleta",
+                req  = urllib.request.Request("http://" + ip + "/add_atleta",
                     data=data, method="POST")
                 urllib.request.urlopen(req, timeout=3)
-
-                # Refrescar panel
                 self.after(500, self._wifi_panel_refresh)
             except Exception as e:
                 self.after(0, lambda m=str(e): self.wifi_panel_status.configure(
@@ -1712,18 +1714,15 @@ class LanceaApp(ctk.CTk):
         threading.Thread(target=_run, daemon=True).start()
 
     def _wifi_add_athlete(self):
-        """Registra un nuevo atleta en el ESP via POST /add_atleta."""
         import urllib.request, urllib.error, urllib.parse
         name = self.wifi_new_athlete.get().strip()
-        if not name:
-            return
+        if not name: return
         ip = self._wifi_get_ip()
 
         def _run():
             try:
                 data = urllib.parse.urlencode({"nombre": name}).encode()
-                req  = urllib.request.Request(
-                    "http://" + ip + "/add_atleta",
+                req  = urllib.request.Request("http://" + ip + "/add_atleta",
                     data=data, method="POST")
                 urllib.request.urlopen(req, timeout=3)
                 self.after(0, lambda: self.wifi_new_athlete.delete(0, "end"))
@@ -1735,7 +1734,6 @@ class LanceaApp(ctk.CTk):
         threading.Thread(target=_run, daemon=True).start()
 
     def _wifi_reset_atleta(self):
-        """Borra los lanzamientos del atleta activo en el ESP via /reset."""
         import urllib.request
         if not messagebox.askyesno("Confirmar",
             "Borrar lanzamientos del atleta activo en el dispositivo?"):
@@ -1752,24 +1750,21 @@ class LanceaApp(ctk.CTk):
 
         threading.Thread(target=_run, daemon=True).start()
 
-        # ── FRAME SD · VOLCADO & ANÁLISIS ─────────────────────────────────────────
+    # ── FRAME SD ───────────────────────────────────────────────────────────────
 
     def _build_sd_frame(self):
         self.sd_frame = ctk.CTkFrame(self.main_area, fg_color="transparent")
 
-        # Header
         header = ctk.CTkFrame(self.sd_frame, fg_color="transparent")
         header.pack(fill="x", padx=24, pady=(24, 16))
         ctk.CTkLabel(header, text="SD · VOLCADO & ANÁLISIS",
             font=ctk.CTkFont(family="Consolas", size=20, weight="bold"),
             text_color=TEXT_PRI).pack(side="left")
 
-        # ── Zona superior: dos columnas ───────────────────────────────────────
         top = ctk.CTkFrame(self.sd_frame, fg_color="transparent")
         top.pack(fill="x", padx=24, pady=(0, 14))
         top.columnconfigure((0, 1), weight=1)
 
-        # — Panel izquierdo: conexión y control —
         ctrl_panel = ctk.CTkFrame(top, fg_color=BG_CARD,
             border_width=1, border_color=BORDER, corner_radius=8)
         ctrl_panel.grid(row=0, column=0, padx=(0, 8), sticky="nsew")
@@ -1778,7 +1773,6 @@ class LanceaApp(ctk.CTk):
             padx=16, pady=(16, 10), anchor="w")
         ctk.CTkFrame(ctrl_panel, height=1, fg_color=BORDER).pack(fill="x", padx=16)
 
-        # Estado de transferencia
         state_row = ctk.CTkFrame(ctrl_panel, fg_color="transparent")
         state_row.pack(fill="x", padx=16, pady=12)
 
@@ -1790,7 +1784,6 @@ class LanceaApp(ctk.CTk):
             text_color=TEXT_DIM)
         self.sd_status_lbl.pack(side="left")
 
-        # Barra de progreso
         self.sd_progress = ctk.CTkProgressBar(ctrl_panel,
             fg_color=BG_BASE, progress_color=ACCENT1, height=6, corner_radius=3)
         self.sd_progress.set(0)
@@ -1800,7 +1793,6 @@ class LanceaApp(ctk.CTk):
             font=ctk.CTkFont(family="Consolas", size=10), text_color=TEXT_DIM)
         self.sd_progress_lbl.pack(padx=16, pady=(0, 10), anchor="w")
 
-        # Botón solicitar volcado
         btn_row = ctk.CTkFrame(ctrl_panel, fg_color="transparent")
         btn_row.pack(fill="x", padx=16, pady=(4, 16))
 
@@ -1819,15 +1811,12 @@ class LanceaApp(ctk.CTk):
             border_width=1, border_color=BORDER,
             height=38, corner_radius=6).pack(side="left")
 
-        # — Panel derecho: archivos importados —
         files_panel = ctk.CTkFrame(top, fg_color=BG_CARD,
             border_width=1, border_color=BORDER, corner_radius=8)
         files_panel.grid(row=0, column=1, padx=(8, 0), sticky="nsew")
         files_panel.grid_rowconfigure(1, weight=1)
         files_panel.grid_columnconfigure(0, weight=1)
 
-        hdr2 = ctk.CTkFrame(files_panel, fg_color="transparent")
-        hdr2.grid(row=0, column=0, sticky="ew", padx=16, pady=(16, 0))
         SectionTitle(files_panel, "◫  ARCHIVOS IMPORTADOS DESDE SD").grid(
             row=0, column=0, padx=16, pady=(16, 6), sticky="w")
 
@@ -1837,12 +1826,10 @@ class LanceaApp(ctk.CTk):
         self.sd_file_list.grid(row=1, column=0, padx=12, pady=(0, 12), sticky="nsew")
         self._refresh_sd_file_list()
 
-        # ── Zona inferior: análisis ───────────────────────────────────────────
         analysis_outer = ctk.CTkFrame(self.sd_frame, fg_color=BG_CARD,
             border_width=1, border_color=BORDER, corner_radius=8)
         analysis_outer.pack(fill="both", expand=True, padx=24, pady=(0, 20))
 
-        # Sub-toolbar de análisis
         atb = ctk.CTkFrame(analysis_outer, fg_color="transparent")
         atb.pack(fill="x", padx=16, pady=(14, 8))
 
@@ -1861,7 +1848,6 @@ class LanceaApp(ctk.CTk):
 
         ctk.CTkFrame(analysis_outer, height=1, fg_color=BORDER).pack(fill="x", padx=16)
 
-        # KPIs de análisis SD
         self.sd_kpi_row = ctk.CTkFrame(analysis_outer, fg_color="transparent")
         self.sd_kpi_row.pack(fill="x", padx=16, pady=10)
         self.sd_kpi_row.columnconfigure((0, 1, 2, 3, 4), weight=1)
@@ -1887,15 +1873,11 @@ class LanceaApp(ctk.CTk):
                 text_color=TEXT_DIM).pack(padx=10, pady=(0, 8), anchor="w")
             self._sd_kpi_labels[key] = vl
 
-        # Área de gráfica / log
         self.sd_plot_area = ctk.CTkFrame(analysis_outer,
             fg_color=BG_BASE, corner_radius=6)
         self.sd_plot_area.pack(fill="both", expand=True, padx=16, pady=(0, 14))
 
-        # Placeholder
         self._sd_placeholder()
-
-        # Datos cargados en memoria para re-plot
         self._sd_df: pd.DataFrame | None = None
         self._sd_text_lines: list[str] = []
 
@@ -1911,10 +1893,7 @@ class LanceaApp(ctk.CTk):
             font=ctk.CTkFont(family="Consolas", size=12), text_color=TEXT_DIM,
             wraplength=480, justify="center").pack(pady=8)
 
-    # ── LÓGICA SD ──────────────────────────────────────────────────────────────
-
     def _request_sd_dump(self):
-        """Envía el comando SD_DUMP al ESP32 por el puerto serial activo."""
         if not self.is_reading or self.serial_port is None:
             messagebox.showwarning("Sin enlace",
                 "Debes iniciar el enlace serial antes de solicitar el volcado.")
@@ -1935,7 +1914,6 @@ class LanceaApp(ctk.CTk):
         self.sd_status_lbl.configure(text=text, text_color=color)
 
     def _sd_open_local(self):
-        """Abre un CSV/LOG ya exportado de la SD sin usar el puerto serial."""
         path = filedialog.askopenfilename(
             initialdir=SD_IMPORTS,
             filetypes=[("Datos SD", "*.csv *.txt *.log"),
@@ -1974,7 +1952,6 @@ class LanceaApp(ctk.CTk):
                 font=ctk.CTkFont(family="Consolas", size=10),
                 text_color=TEXT_DIM).pack(side="right", padx=10)
 
-            # Click para analizar
             for child in row.winfo_children():
                 child.bind("<Button-1>",
                     lambda e, p=fpath: self._sd_load_and_analyze(p))
@@ -1982,7 +1959,6 @@ class LanceaApp(ctk.CTk):
                 lambda e, p=fpath: self._sd_load_and_analyze(p))
 
     def _sd_load_and_analyze(self, path: str):
-        """Detecta el tipo de archivo SD y lanza el análisis adecuado."""
         self._sd_set_status(f"CARGADO: {os.path.basename(path)}", ACCENT3)
         try:
             df = pd.read_csv(path, sep=None, engine="python",
@@ -1999,7 +1975,6 @@ class LanceaApp(ctk.CTk):
             self._sd_render_text()
 
     def _sd_update_kpis(self, df: pd.DataFrame):
-        """Calcula y muestra KPIs desde un DataFrame numérico."""
         def col(names):
             for n in names:
                 if n in df.columns: return n
@@ -2009,8 +1984,6 @@ class LanceaApp(ctk.CTk):
         a_col  = col(["Angulo", "angulo", "Ángulo", "A_deg"])
         d_col  = col(["Distancia", "distancia", "D"])
         ax_col = col(["Ax", "ax"])
-        ay_col = col(["Ay", "ay"])
-        az_col = col(["Az", "az"])
 
         v_max = f"{df[v_col].max():.2f}" if v_col else "–"
         d_max = f"{df[d_col].max():.2f}" if d_col else "–"
@@ -2022,7 +1995,7 @@ class LanceaApp(ctk.CTk):
         else:
             a_opt = "–"
 
-        dur = f"{len(df) * 0.01:.1f}" if ax_col else "–"  # asume 100 Hz
+        dur = f"{len(df) * 0.01:.1f}" if ax_col else "–"
 
         self._sd_kpi_labels["V_MAX"].configure(text=v_max)
         self._sd_kpi_labels["A_OPT"].configure(text=a_opt)
@@ -2031,7 +2004,6 @@ class LanceaApp(ctk.CTk):
         self._sd_kpi_labels["DUR"].configure(text=dur)
 
     def _sd_update_kpis_from_text(self, lines: list[str]):
-        """Extrae KPIs desde un archivo de texto/log."""
         vs, angs, dists = [], [], []
         for line in lines:
             lo = line.lower()
@@ -2050,7 +2022,6 @@ class LanceaApp(ctk.CTk):
         self._sd_kpi_labels["DUR"].configure(text="–")
 
     def _sd_replot(self, mode: str):
-        """Re-dibuja la gráfica según el modo seleccionado."""
         if self._sd_df is None:
             if self._sd_text_lines:
                 self._sd_render_text()
@@ -2137,15 +2108,7 @@ class LanceaApp(ctk.CTk):
         txt.insert("1.0", "".join(self._sd_text_lines))
         txt.configure(state="disabled")
 
-    # ── INTERCEPCIÓN SERIAL PARA PROTOCOLO SD ──────────────────────────────────
-    # El ESP32 debe enviar:
-    #   SD_START            ← inicio del volcado
-    #   <líneas de datos>
-    #   SD_END              ← fin del volcado
-    #
-    # Esto se gestiona en _process_line sin romper la telemetría normal.
-
-    
+    # ── GESTIÓN ATLETAS ─────────────────────────────────────────────────────────
 
     def _refresh_athlete_list(self):
         for w in self.athlete_scroll.winfo_children():
@@ -2182,8 +2145,7 @@ class LanceaApp(ctk.CTk):
 
     def _add_athlete(self):
         name = self.new_athlete_entry.get().strip()
-        if not name:
-            return
+        if not name: return
         if name in self.cfg["athletes"]:
             messagebox.showwarning("Duplicado", f"El atleta '{name}' ya existe.")
             return
