@@ -10,6 +10,12 @@
 //  · CSV y tabla filtrados por atleta activo
 //  · /csv?atleta=Todos  → exporta todos los atletas juntos
 //
+//  BUZZER:
+//  · Pin 21, pasivo, controlado con tone()/noTone()
+//  · Monitorea angulo en IDLE cada 100ms (sin bloquear)
+//  · Suena a 2kHz cuando el angulo esta entre 42° y 45°
+//  · Se apaga automaticamente al detectar el impulso
+//
 //  PAGINAS WEB:
 //    192.168.4.1/          → panel principal (atleta activo)
 //    192.168.4.1/atletas   → gestionar atletas
@@ -37,9 +43,10 @@ const IPAddress AP_IP(192, 168, 4, 1);
 // ================================================================
 //  PINES  XIAO ESP32-C3
 // ================================================================
-#define I2C_SDA  6
-#define I2C_SCL  7
-#define LED_PIN 10
+#define I2C_SDA   6
+#define I2C_SCL   7
+#define LED_PIN  10
+#define BUZZER_PIN 21
 
 // ================================================================
 //  PARAMETROS FISICOS
@@ -161,6 +168,48 @@ double        prev_aMag=0, maxAccel=0, launchAngle=0;
 unsigned long startImpulse=0;
 
 // ================================================================
+//  BUZZER DE ANGULO OPTIMO (pre-lanzamiento)
+// ================================================================
+const float          ANGLE_OPT_LOW      = 42.0f;
+const float          ANGLE_OPT_HIGH     = 45.8f;
+const int            BUZZER_FREQ        = 2700;   // Hz
+const unsigned long  BUZZER_INTERVAL_MS = 100;    // medir cada 100ms
+
+bool          buzzerActive    = false;
+unsigned long lastBuzzerCheck = 0;
+
+void updateAngleBuzzer() {
+  if (millis() - lastBuzzerCheck < BUZZER_INTERVAL_MS) return;
+  lastBuzzerCheck = millis();
+
+  if (estadoActual != IDLE) {
+    if (buzzerActive) {
+      noTone(BUZZER_PIN);
+      buzzerActive = false;
+      safePrintln("[BUZZER] OFF — fuera de IDLE");
+    }
+    return;
+  }
+
+  imu::Quaternion  quat  = bno.getQuat();
+  imu::Vector<3>   euler = quat.toEuler();
+  float currentAngle = euler.y() * 180.0f / PI;
+
+  if (currentAngle >= ANGLE_OPT_LOW && currentAngle <= ANGLE_OPT_HIGH) {
+    if (!buzzerActive) {
+      tone(BUZZER_PIN, BUZZER_FREQ);
+      buzzerActive = true;
+      safePrintln("[BUZZER] ON  — angulo: " + String(currentAngle, 1) + " deg (42-45)");
+    }
+  } else {
+    if (buzzerActive) {
+      noTone(BUZZER_PIN);
+      buzzerActive = false;
+      safePrintln("[BUZZER] OFF — angulo: " + String(currentAngle, 1) + " deg");
+    }
+  }
+}
+// ================================================================
 //  SERIAL SEGURO
 // ================================================================
 void safePrint(const String& s) {
@@ -200,6 +249,10 @@ void setup() {
   Serial.begin(115200);
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
+
+  pinMode(BUZZER_PIN, OUTPUT);
+  noTone(BUZZER_PIN);
+
   delay(3000);
 
   Wire.begin(I2C_SDA, I2C_SCL);
@@ -225,6 +278,8 @@ void setup() {
 
   safePrintln("[WEB]  http://192.168.4.1");
   safePrintln("[WEB]  http://192.168.4.1/atletas");
+  safePrintln("[BUZZER] Pin " + String(BUZZER_PIN) + " | Angulo optimo: " +
+              String(ANGLE_OPT_LOW,0) + "-" + String(ANGLE_OPT_HIGH,0) + " deg");
   safePrintln(">>> Listo. Atleta: " + nombreActivo());
   safePrintln("------------------------------------------------");
 
@@ -262,6 +317,7 @@ void loop() {
   server.handleClient();
   handleCommands();
   led.update();
+  updateAngleBuzzer();   // monitoreo continuo de angulo, no bloquea
 
   switch (estadoActual) {
     case IDLE: {
@@ -300,6 +356,12 @@ void loop() {
   prev_aMag = aMag;
 
   if (estadoActual==IDLE && jerk>JERK_THRESHOLD) {
+    // Apagar buzzer inmediatamente al detectar el impulso
+    if (buzzerActive) {
+      noTone(BUZZER_PIN);
+      buzzerActive = false;
+    }
+
     estadoActual = IMPULSO;
     startImpulse = millis();
     digitalWrite(LED_PIN, LOW);
@@ -625,7 +687,8 @@ void handleStatus() {
   json += "\"num_atletas\":"+String(numAtletas)+",";
   json += "\"estado\":\"";
   json += estadoActual==IMPULSO?"IMPULSO":estadoActual==PAUSA?"PAUSA":"IDLE";
-  json += "\",\"uptime_s\":"+String(millis()/1000)+"}";
+  json += "\",\"uptime_s\":"+String(millis()/1000)+",";
+  json += "\"buzzer_activo\":"+String(buzzerActive?"true":"false")+"}";
   server.send(200, "application/json", json);
 }
 
