@@ -5,7 +5,7 @@ Antes de cerrar esta tarea y moverla a "Done", certifico como ingeniero a cargo 
 ### ⚡ 1. HARDWARE
 - [x] **Esquemático/PCB:** Actualizado en la carpeta `02_Hardware` sin errores de reglas de diseño (0 Errores DRC).
 - [x] **Continuidad:** La placa pasó la prueba de cortos (0 cortos en pistas de potencia y buses I2C/SPI).
-- [x] **Cero Parches:** No hay cables "voladores"; las conexiones del BNO055 y la MicroSD están ruteadas o soldadas firmemente.
+- [x] **Cero Parches:** No hay cables "voladores"; las conexiones del BNO055 están ruteadas o soldadas firmemente.
 - [x] **Métricas:** El módulo TP4056 entrega voltaje de carga estable y el ESP32 recibe sus 3.3V lógicos dentro de la tolerancia exigida.
 
 ### 💻 2. FIRMWARE/SOFTWARE
