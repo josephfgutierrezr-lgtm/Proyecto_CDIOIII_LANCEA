@@ -39,6 +39,20 @@ Para capturar la cinemática del vuelo, era crítico probar la viabilidad de est
 Los resultados exitosos de estas pruebas preliminares permitieron:
 1.  Confirmar la viabilidad física del chasis impreso en 3D ("Sled").
 2.  Justificar el *upgrade* del sensor MPU6050 al **BNO055** actual, para obtener cuaterniones por hardware y evitar el "Gimbal Lock" en vuelos dinámicos.
-3.  Establecer la arquitectura de energía final basada en baterías 14500 con gestión TP4056.
+3.  Establecer la arquitectura de energía final basada en baterías 14500/18650 con gestión TP4056.
 
 Estos antecedentes son la base sobre la cual se está desarrollando el firmware y hardware de alta velocidad de la versión actual.
+
+---
+
+## 🛠️ 3. Implementación Actual (Fase 2)
+
+A partir de las conclusiones de las pruebas de concepto, se procedió a la materialización del hardware definitivo, logrando integrar con éxito las mejoras propuestas:
+
+### Ensamble de PCB Definitiva
+![Implementación Final PCB](IMPLEMENTACION_FINAL_PCB.jpeg)
+* **Avance:** Montaje exitoso de la PCB principal en formato "Strip". Se consolida el salto tecnológico integrando el microcontrolador **XIAO ESP32-C3** y el sensor inercial **BNO055** de alta precisión, respetando estrictamente el ancho máximo permitido por el diámetro interno de la jabalina.
+
+### Integración Estructural del Sistema de Energía
+![Avance de Conexión](AVANCE_CONEXION.jpeg)
+* **Avance:** Mecanizado e integración del sistema de alimentación en un prototipo estructural (simulador de madera). Se comprueba el ajuste perfecto de la **batería Li-ion** y el módulo de carga **TP4056** en los compartimentos empotrados, garantizando que los componentes no sobresalgan del perfil cilíndrico ni comprometan la aerodinámica o el centro de masa del proyectil.
