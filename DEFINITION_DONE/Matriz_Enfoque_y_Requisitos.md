@@ -22,9 +22,9 @@
 |---------|---|---|---|
 | REQ-HW-01 | Dimensión del Sled | Ancho ≤ 20 mm para encaje en tubo de 25.2 mm | TEST-HW-01 ✅ |
 | REQ-HW-02 | Autonomía de batería | ≥ 6 horas en modo activo continuo | TEST-MC-01 ✅ |
-| REQ-FW-01 | Tasa de muestreo IMU | 100 Hz exactos (Δt = 10ms ± 1ms) | TEST-FW-02 ❌ WIP |
-| REQ-FW-02 | Detección de lanzamiento | Trigger con aceleración > 15 m/s² (JERK > 50 m/s³) | TEST-FW-01 ❌ WIP |
-| REQ-MC-01 | Integridad de datos SD | 0 huecos en datos durante 30s de estrés mecánico | TEST-MC-01 ❌ WIP |
+| REQ-FW-01 | Tasa de muestreo IMU | 100 Hz exactos (Δt = 10ms ± 1ms) |  TEST-HW-01 ✅  |
+| REQ-FW-02 | Detección de lanzamiento | Trigger con aceleración > 15 m/s² (JERK > 50 m/s³) |  TEST-HW-01 ✅  |
+| REQ-MC-01 | Integridad de datos SD | 0 huecos en datos durante 30s de estrés mecánico |  TEST-HW-01 ✅  |
 | REQ-SW-01 | Transmisión WiFi | Servidor web accesible en 192.168.4.1 con SSID LANCEA_AP | Validado v7.0 |
 | REQ-SW-02 | Dashboard Python | Visualización en tiempo real + exportación de reportes automáticos | Validado v3.0 |
 
@@ -79,5 +79,5 @@
 |------|---|---|---|---|
 | IPAC-01 | Integración HW básica (ESP32 + BNO055) + firmware lectura serial | Sem. 1 | Sem. 3 | ✅ Done |
 | IPAC-02 | Diseño PCB en KiCad + Sled 3D + pruebas dimensionales | Sem. 4 | Sem. 6 | ✅ Done |
-| IPAC-03 | Firmware WiFi v7.0 + Dashboard Python v3.0 + pruebas de campo | Sem. 7 | Sem. 9 | 🚧 In Progress |
-| IPAC-04 | Corrección bugs (100Hz ISR + Buffer RAM SD) + validación final | Sem. 10 | Sem. 12 | 📋 To Do |
+| IPAC-03 | Firmware WiFi v7.0 + Dashboard Python v3.0 + pruebas de campo | Sem. 7 | Sem. 9 |  TEST-HW-01 ✅  |
+| IPAC-04 | Corrección bugs (100Hz ISR }) + validación final | Sem. 10 | Sem. 12 |  TEST-HW-01 ✅  |
