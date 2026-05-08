@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LANCEA | Jabalina Inteligente</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #050A12;
+    --deep: #0B1623;
+    --panel: #0F1F32;
+    --border: #1A3050;
+    --cyan: #00C8FF;
+    --cyan-dim: #0099CC;
+    --green: #00FF88;
+    --amber: #F0A500;
+    --red: #FF3B5C;
+    --purple: #A855F7;
+    --text: #E8F4FD;
+    --muted: #6B8BA4;
+    --faint: #334B62;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--night);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ── STARFIELD ── */
+  #stars {
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(1px 1px at 10% 15%, rgba(0,200,255,.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 60%, rgba(0,200,255,.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 55% 25%, rgba(255,255,255,.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 80%, rgba(0,255,136,.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 40%, rgba(0,200,255,.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 45% 90%, rgba(255,255,255,.3) 0%, transparent 100%);
+  }
+
+  /* ── NAVBAR ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2.5rem;
+    background: rgba(5,10,18,.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem; letter-spacing: .15em;
+    color: var(--cyan);
+    display: flex; align-items: center; gap: .5rem;
+  }
+
+  .nav-logo svg { width: 28px; height: 28px; fill: var(--cyan); }
+
+  .nav-links { display: flex; gap: 2rem; align-items: center; }
+  .nav-links a {
+    color: var(--muted); text-decoration: none;
+    font-size: .85rem; letter-spacing: .08em; text-transform: uppercase;
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--cyan); }
+
+  .nav-btn {
+    background: var(--cyan); color: var(--night);
+    padding: .45rem 1.2rem; border-radius: 4px;
+    font-weight: 700; font-size: .8rem; letter-spacing: .06em;
+    text-transform: uppercase; text-decoration: none;
+    transition: background .2s, transform .1s;
+  }
+  .nav-btn:hover { background: #33d4ff; transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative; min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 8rem 2rem 4rem;
+    overflow: hidden;
+  }
+
+  .hero-glow {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(0,200,255,.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--cyan); border: 1px solid var(--border);
+    padding: .3rem 1rem; border-radius: 100px;
+    margin-bottom: 2rem;
+    animation: fadeUp .8s ease both;
+  }
+
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 14vw, 12rem);
+    line-height: .9; letter-spacing: .04em;
+    color: var(--text);
+    animation: fadeUp .8s .1s ease both;
+  }
+
+  .hero h1 span { color: var(--cyan); }
+
+  .hero-sub {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    color: var(--muted); max-width: 560px;
+    margin: 1.5rem auto 2.5rem;
+    font-weight: 300; line-height: 1.7;
+    animation: fadeUp .8s .2s ease both;
+  }
+
+  .hero-actions {
+    display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+    animation: fadeUp .8s .3s ease both;
+  }
+
+  .btn-primary {
+    background: var(--cyan); color: var(--night);
+    padding: .85rem 2.2rem; border-radius: 6px;
+    font-weight: 700; font-size: .95rem; text-decoration: none;
+    transition: transform .15s, box-shadow .15s;
+    box-shadow: 0 0 24px rgba(0,200,255,.25);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(0,200,255,.4); }
+
+  .btn-outline {
+    border: 1px solid var(--border); color: var(--muted);
+    padding: .85rem 2.2rem; border-radius: 6px;
+    font-size: .95rem; text-decoration: none;
+    transition: border-color .2s, color .2s;
+  }
+  .btn-outline:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  .hero-stats {
+    display: flex; gap: 3rem; justify-content: center; flex-wrap: wrap;
+    margin-top: 5rem;
+    animation: fadeUp .8s .4s ease both;
+  }
+
+  .stat { text-align: center; }
+  .stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem; color: var(--cyan); line-height: 1;
+    text-shadow: 0 0 20px rgba(0,200,255,.4);
+  }
+  .stat-label { font-size: .75rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-top: .2rem; }
+
+  .divider { width: 1px; height: 60px; background: var(--border); margin: auto 0; }
+
+  /* ── SECTION COMMON ── */
+  section { position: relative; z-index: 1; }
+
+  .section-inner {
+    max-width: 1100px; margin: 0 auto; padding: 5rem 2rem;
+  }
+
+  .section-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .7rem; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--cyan); margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    letter-spacing: .04em; line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .section-desc {
+    color: var(--muted); font-size: 1.05rem; max-width: 600px;
+    line-height: 1.7; font-weight: 300;
+  }
+
+  /* ── WHAT IS ── */
+  .what-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 3rem; align-items: start; margin-top: 4rem;
+  }
+
+  @media(max-width:700px){ .what-grid { grid-template-columns: 1fr; } }
+
+  .spec-block {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 2rem;
+  }
+
+  .spec-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: .75rem 0; border-bottom: 1px solid var(--border);
+    font-size: .9rem;
+  }
+  .spec-row:last-child { border-bottom: none; }
+  .spec-key { color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: .8rem; }
+  .spec-val { color: var(--text); font-weight: 500; text-align: right; }
+  .spec-val.green { color: var(--green); }
+  .spec-val.cyan  { color: var(--cyan);  }
+  .spec-val.amber { color: var(--amber); }
+
+  .feature-list { list-style: none; }
+  .feature-list li {
+    display: flex; gap: 1rem; align-items: flex-start;
+    padding: 1rem 0; border-bottom: 1px solid var(--border);
+    font-size: .95rem; line-height: 1.5;
+  }
+  .feature-list li:last-child { border-bottom: none; }
+  .feature-list .icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: rgba(0,200,255,.1); border: 1px solid rgba(0,200,255,.2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 1rem;
+  }
+  .feature-list .icon.green { background: rgba(0,255,136,.1); border-color: rgba(0,255,136,.2); }
+  .feature-list .icon.amber { background: rgba(240,165,0,.1); border-color: rgba(240,165,0,.2); }
+  .feature-list strong { display: block; color: var(--text); margin-bottom: .2rem; }
+  .feature-list span { color: var(--muted); font-size: .88rem; }
+
+  /* ── ARCHITECTURE ── */
+  .arch-section { background: var(--deep); }
+
+  .arch-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem; margin-top: 3rem;
+  }
+
+  .arch-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.8rem;
+    transition: border-color .2s, transform .2s;
+  }
+  .arch-card:hover { border-color: var(--cyan); transform: translateY(-3px); }
+
+  .arch-card-icon {
+    font-size: 1.5rem; margin-bottom: 1rem;
+  }
+  .arch-card-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem; text-transform: uppercase; letter-spacing: .12em;
+    color: var(--cyan); margin-bottom: .5rem;
+  }
+  .arch-card h4 { font-size: 1.05rem; font-weight: 600; margin-bottom: .5rem; }
+  .arch-card p { font-size: .85rem; color: var(--muted); line-height: 1.6; }
+  .arch-card .badge {
+    display: inline-block; margin-top: .8rem;
+    font-size: .7rem; font-family: 'JetBrains Mono', monospace;
+    padding: .2rem .6rem; border-radius: 4px;
+    background: rgba(0,200,255,.1); color: var(--cyan);
+    border: 1px solid rgba(0,200,255,.2);
+  }
+
+  /* ── FSM STATES ── */
+  .fsm-row {
+    display: flex; align-items: center; gap: 0;
+    margin-top: 3rem; overflow-x: auto; padding-bottom: 1rem;
+  }
+
+  .fsm-state {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.5rem 2rem;
+    min-width: 200px; flex-shrink: 0;
+    text-align: center;
+  }
+  .fsm-state.active { border-color: var(--cyan); background: rgba(0,200,255,.05); }
+
+  .fsm-dot {
+    width: 12px; height: 12px; border-radius: 50%; margin: 0 auto .75rem;
+  }
+  .fsm-dot.idle    { background: var(--green); box-shadow: 0 0 12px var(--green); }
+  .fsm-dot.impulso { background: var(--amber); box-shadow: 0 0 12px var(--amber); }
+  .fsm-dot.pausa   { background: var(--red);   box-shadow: 0 0 12px var(--red);   }
+  .fsm-dot.done    { background: var(--purple); box-shadow: 0 0 12px var(--purple);}
+
+  .fsm-state-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem; letter-spacing: .06em; margin-bottom: .5rem;
+  }
+  .fsm-state p { font-size: .8rem; color: var(--muted); line-height: 1.5; }
+
+  .fsm-arrow {
+    font-size: .8rem; color: var(--faint); padding: 0 .5rem;
+    font-family: 'JetBrains Mono', monospace; flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: center; gap: .2rem;
+  }
+  .fsm-arrow span { color: var(--cyan); font-size: .7rem; text-align: center; max-width: 80px; }
+
+  /* ── PRUEBAS ── */
+  .tests-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem; margin-top: 3rem;
+  }
+
+  .test-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.8rem;
+    border-left: 3px solid var(--green);
+  }
+
+  .test-id {
+    font-family: 'JetBrains Mono', monospace; font-size: .7rem;
+    color: var(--muted); letter-spacing: .1em;
+    text-transform: uppercase; margin-bottom: .5rem;
+  }
+
+  .test-title { font-size: 1rem; font-weight: 600; margin-bottom: .8rem; }
+  .test-result {
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(0,255,136,.06); border-radius: 6px;
+    padding: .6rem 1rem; margin-top: .8rem;
+    border: 1px solid rgba(0,255,136,.15);
+  }
+  .test-val { font-family: 'JetBrains Mono', monospace; font-size: .9rem; color: var(--green); font-weight: 600; }
+  .test-pass { font-size: .75rem; color: var(--green); }
+  .test-desc { font-size: .83rem; color: var(--muted); line-height: 1.5; }
+
+  /* ── TEAM ── */
+  .team-section { background: var(--deep); }
+
+  .team-grid {
+    display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;
+    margin-top: 3rem;
+  }
+
+  .team-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 2rem 2.5rem;
+    text-align: center; min-width: 200px;
+    transition: border-color .2s, transform .2s;
+  }
+  .team-card:hover { border-color: var(--cyan); transform: translateY(-3px); }
+
+  .team-avatar {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--cyan-dim), var(--cyan));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem; color: var(--night);
+    margin: 0 auto 1rem;
+    border: 2px solid rgba(0,200,255,.3);
+  }
+
+  .team-name { font-weight: 600; font-size: 1rem; margin-bottom: .25rem; }
+  .team-role { font-size: .8rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+  /* ── BOM ── */
+  .bom-table {
+    width: 100%; border-collapse: collapse; margin-top: 2.5rem;
+    font-size: .88rem;
+  }
+  .bom-table th {
+    background: var(--panel); color: var(--muted);
+    font-family: 'JetBrains Mono', monospace; font-size: .72rem;
+    text-transform: uppercase; letter-spacing: .1em;
+    padding: .8rem 1rem; text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .bom-table td {
+    padding: .75rem 1rem; border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .bom-table tr:hover td { background: rgba(255,255,255,.02); }
+  .bom-table .item-name { font-weight: 500; }
+  .bom-table .item-spec { font-size: .78rem; color: var(--muted); }
+  .bom-table .pass-badge {
+    font-size: .72rem; font-family: 'JetBrains Mono', monospace;
+    background: rgba(0,255,136,.1); color: var(--green);
+    padding: .15rem .5rem; border-radius: 4px;
+    border: 1px solid rgba(0,255,136,.2);
+  }
+  .bom-total {
+    background: var(--panel); border: 1px solid var(--cyan);
+    border-radius: 8px; padding: 1.5rem 2rem;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 1.5rem;
+  }
+  .bom-total-label { font-size: .85rem; color: var(--muted); }
+  .bom-total-val { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--cyan); }
+
+  /* ── CHANGELOG ── */
+  .changelog-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1.5rem; margin-top: 3rem;
+  }
+  @media(max-width:700px){ .changelog-grid { grid-template-columns: 1fr; } }
+
+  .change-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.5rem; font-size: .88rem;
+  }
+  .change-sub { font-family: 'JetBrains Mono', monospace; font-size: .7rem;
+    text-transform: uppercase; letter-spacing: .1em; color: var(--cyan); margin-bottom: .5rem; }
+  .change-card h4 { font-size: 1rem; font-weight: 600; margin-bottom: .8rem; }
+  .change-from, .change-to {
+    display: flex; align-items: center; gap: .75rem;
+    padding: .6rem .8rem; border-radius: 6px; margin-bottom: .5rem;
+    font-size: .83rem;
+  }
+  .change-from { background: rgba(255,59,92,.07); border: 1px solid rgba(255,59,92,.15); }
+  .change-to   { background: rgba(0,255,136,.07); border: 1px solid rgba(0,255,136,.15); }
+  .change-from-icon { color: var(--red); }
+  .change-to-icon   { color: var(--green); }
+  .change-why { font-size: .78rem; color: var(--faint); margin-top: .5rem; line-height: 1.4; }
+
+  /* ── WEB UI ── */
+  .web-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+    gap: 1rem; margin-top: 2.5rem;
+  }
+
+  .route-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.2rem;
+  }
+  .route-path {
+    font-family: 'JetBrains Mono', monospace; font-size: .8rem;
+    color: var(--cyan); margin-bottom: .4rem;
+  }
+  .route-card p { font-size: .83rem; color: var(--muted); line-height: 1.5; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--deep); border-top: 1px solid var(--border);
+    padding: 3rem 2rem; text-align: center;
+  }
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem; letter-spacing: .12em; color: var(--cyan);
+    margin-bottom: .5rem;
+  }
+  footer p { font-size: .83rem; color: var(--faint); line-height: 1.8; }
+  .footer-links { display: flex; gap: 2rem; justify-content: center; margin: 1.5rem 0; }
+  .footer-links a { color: var(--muted); text-decoration: none; font-size: .85rem; transition: color .2s; }
+  .footer-links a:hover { color: var(--cyan); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in {
+    opacity: 0; transform: translateY(20px);
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: #03060A; border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.5rem;
+    font-family: 'JetBrains Mono', monospace; font-size: .8rem;
+    line-height: 1.8; overflow-x: auto; margin-top: 2rem;
+  }
+  .code-block .kw   { color: var(--cyan);   }
+  .code-block .str  { color: var(--green);  }
+  .code-block .num  { color: var(--amber);  }
+  .code-block .cmt  { color: var(--faint);  }
+  .code-block .fn   { color: var(--purple); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--deep); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+</style>
+</head>
+<body>
+
+<div id="stars"></div>
+
+<!-- ── NAVBAR ── -->
+<nav>
+  <div class="nav-logo">
+    <svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 4l7.5 14H4.5L12 6z"/></svg>
+    LANCEA
+  </div>
+  <div class="nav-links">
+    <a href="#sistema">Sistema</a>
+    <a href="#arquitectura">Arquitectura</a>
+    <a href="#pruebas">Pruebas</a>
+    <a href="#equipo">Equipo</a>
+    <a href="https://github.com/josephfgutierrezr-lgtm/Proyecto_CDIOIII_LANCEA/tree/main" target="_blank" class="nav-btn">GitHub →</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<header class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-tag">CDIO III · Universidad del Quindío · Ingeniería Electrónica</div>
+  <h1>LANCE<span>A</span></h1>
+  <p class="hero-sub">Dispositivo electrónico embebido que transforma una jabalina deportiva en una herramienta de análisis biomecánico en tiempo real.</p>
+  <div class="hero-actions">
+    <a href="#sistema" class="btn-primary">Explorar el Sistema</a>
+    <a href="https://github.com/josephfgutierrezr-lgtm/Proyecto_CDIOIII_LANCEA" target="_blank" class="btn-outline">Ver Repositorio</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-val">100<span style="font-size:1.2rem">Hz</span></div>
+      <div class="stat-label">Tasa de muestreo</div>
+    </div>
+    <div class="divider"></div>
+    <div class="stat">
+      <div class="stat-val">7h15</div>
+      <div class="stat-label">Autonomía validada</div>
+    </div>
+    <div class="divider"></div>
+    <div class="stat">
+      <div class="stat-val">19.8<span style="font-size:1.2rem">mm</span></div>
+      <div class="stat-label">Ancho de PCB</div>
+    </div>
+    <div class="divider"></div>
+    <div class="stat">
+      <div class="stat-val">6/6</div>
+      <div class="stat-label">Tests en PASS</div>
+    </div>
+  </div>
+</header>
+
+<!-- ── QUÉ ES LANCEA ── -->
+<section id="sistema">
+  <div class="section-inner">
+    <div class="section-tag fade-in">// Sistema</div>
+    <h2 class="section-title fade-in">¿Qué es LANCEA?</h2>
+    <p class="section-desc fade-in">Un sistema embebido integrado físicamente dentro de una jabalina profesional que captura, procesa y transmite datos inerciales durante el lanzamiento sin alterar la aerodinámica.</p>
+
+    <div class="what-grid fade-in">
+      <div>
+        <ul class="feature-list">
+          <li>
+            <div class="icon">📡</div>
+            <div>
+              <strong>Captura inercial 9-DOF</strong>
+              <span>El sensor BNO055 entrega cuaterniones por hardware, eliminando el "Gimbal Lock" y capturando aceleración, giroscopio y magnetómetro fusionados.</span>
+            </div>
+          </li>
+          <li>
+            <div class="icon green">⚡</div>
+            <div>
+              <strong>ISR a 100Hz exactos</strong>
+              <span>Rutina de interrupción hardware garantiza σ(Δt) &lt; 1ms entre muestras, sin usar delay() bloqueante en ningún momento del ciclo.</span>
+            </div>
+          </li>
+          <li>
+            <div class="icon amber">📶</div>
+            <div>
+              <strong>Access Point propio</strong>
+              <span>El ESP32-C3 actúa como router Wi-Fi (SSID: LANCEA_AP). Sin internet, desde el celular o PC se accede a 192.168.4.1 para ver datos y descargar CSV.</span>
+            </div>
+          </li>
+          <li>
+            <div class="icon">🔔</div>
+            <div>
+              <strong>Buzzer de ángulo óptimo</strong>
+              <span>Suena a 2700Hz cuando el ángulo de inclinación está entre 42°–45.8° (zona óptima de lanzamiento), brindando feedback auditivo inmediato al atleta.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="spec-block">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:.12em; margin-bottom:1.2rem;">Especificaciones técnicas</div>
+        <div class="spec-row"><span class="spec-key">MCU</span><span class="spec-val cyan">XIAO ESP32-C3</span></div>
+        <div class="spec-row"><span class="spec-key">Sensor IMU</span><span class="spec-val">BNO055 (9-DOF)</span></div>
+        <div class="spec-row"><span class="spec-key">Protocolo IMU</span><span class="spec-val cyan">I2C · 400kHz</span></div>
+        <div class="spec-row"><span class="spec-key">SDA / SCL</span><span class="spec-val">GPIO 6 / GPIO 7</span></div>
+        <div class="spec-row"><span class="spec-key">Muestreo</span><span class="spec-val green">100 Hz (ISR)</span></div>
+        <div class="spec-row"><span class="spec-key">Jitter</span><span class="spec-val green">σ &lt; 1 ms</span></div>
+        <div class="spec-row"><span class="spec-key">Batería</span><span class="spec-val">Li-Ion 14500 · 3.7V</span></div>
+        <div class="spec-row"><span class="spec-key">Autonomía</span><span class="spec-val green">7h 15min ✓</span></div>
+        <div class="spec-row"><span class="spec-key">Carga</span><span class="spec-val">TP4056 USB-C</span></div>
+        <div class="spec-row"><span class="spec-key">Chasis</span><span class="spec-val">PETG · O-Rings</span></div>
+        <div class="spec-row"><span class="spec-key">Ancho PCB</span><span class="spec-val green">19.8 mm ✓</span></div>
+        <div class="spec-row"><span class="spec-key">Ø int. jabalina</span><span class="spec-val">25.2 mm</span></div>
+        <div class="spec-row"><span class="spec-key">Peso total</span><span class="spec-val amber">~42 g</span></div>
+        <div class="spec-row"><span class="spec-key">Trigger</span><span class="spec-val">Jerk &gt; 50 m/s³</span></div>
+        <div class="spec-row"><span class="spec-key">WiFi SSID</span><span class="spec-val cyan">LANCEA_AP</span></div>
+        <div class="spec-row"><span class="spec-key">Dashboard</span><span class="spec-val">192.168.4.1</span></div>
+        <div class="spec-row"><span class="spec-key">Costo total</span><span class="spec-val amber">$235.300 COP</span></div>
+        <div class="spec-row"><span class="spec-key">Variación</span><span class="spec-val green">+0.26% ✓</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ARQUITECTURA ── -->
+<section id="arquitectura" class="arch-section">
+  <div class="section-inner">
+    <div class="section-tag fade-in">// Arquitectura</div>
+    <h2 class="section-title fade-in">Cómo funciona</h2>
+    <p class="section-desc fade-in">El firmware implementa una Máquina de Estados Finitos (FSM) que coordina la adquisición de alta velocidad, el procesamiento y la transmisión inalámbrica de forma completamente no bloqueante.</p>
+
+    <!-- FSM -->
+    <div class="fsm-row fade-in">
+      <div class="fsm-state active">
+        <div class="fsm-dot idle"></div>
+        <div class="fsm-state-name">IDLE</div>
+        <p>Monitorea el Jerk continuamente. Buzzer activo si ángulo está en zona óptima.</p>
+      </div>
+      <div class="fsm-arrow">→<span>Jerk &gt; 50 m/s³</span></div>
+      <div class="fsm-state">
+        <div class="fsm-dot impulso"></div>
+        <div class="fsm-state-name">IMPULSO</div>
+        <p>Integra aceleración a 100Hz. Registra ángulo de lanzamiento en el instante de detección.</p>
+      </div>
+      <div class="fsm-arrow">→<span>Accel &lt; 0.8g y Max &gt; 15g</span></div>
+      <div class="fsm-state">
+        <div class="fsm-dot pausa"></div>
+        <div class="fsm-state-name">PAUSA</div>
+        <p>Calcula velocidad, distancia, energía y potencia. LED parpadea 3 veces.</p>
+      </div>
+      <div class="fsm-arrow">→<span>3 segundos</span></div>
+      <div class="fsm-state">
+        <div class="fsm-dot done"></div>
+        <div class="fsm-state-name">PUBLICADO</div>
+        <p>Datos disponibles en 192.168.4.1 y por Serial. Vuelve a IDLE.</p>
+      </div>
+    </div>
+
+    <!-- Componentes -->
+    <div class="arch-grid fade-in">
+      <div class="arch-card">
+        <div class="arch-card-icon">🧠</div>
+        <div class="arch-card-title">Procesamiento</div>
+        <h4>XIAO ESP32-C3</h4>
+        <p>Dual-core con WiFi 2.4GHz integrado. Maneja ISR, servidor web y FSM simultáneamente sin bloqueos.</p>
+        <span class="badge">C++ / Arduino</span>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-icon">📐</div>
+        <div class="arch-card-title">Sensor inercial</div>
+        <h4>Adafruit BNO055</h4>
+        <p>Fusión sensorial por hardware. Entrega cuaterniones listos para usar. Sin Gimbal Lock. 9-DOF.</p>
+        <span class="badge">I2C · 400kHz</span>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-icon">🌐</div>
+        <div class="arch-card-title">Servidor Web</div>
+        <h4>WebServer.h (AP)</h4>
+        <p>ESP32 actúa como Access Point. Panel en HTML, descarga CSV, gestión de atletas, estado JSON.</p>
+        <span class="badge">192.168.4.1</span>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-icon">🔋</div>
+        <div class="arch-card-title">Potencia</div>
+        <h4>Li-Ion 14500 + TP4056</h4>
+        <p>Celda cilíndrica 14mm de diámetro, encaje perfecto en el Sled. Carga USB-C accesible externamente.</p>
+        <span class="badge">7h 15min probado</span>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-icon">🖨️</div>
+        <div class="arch-card-title">Mecánica</div>
+        <h4>Chasis Sled (PETG)</h4>
+        <p>Impreso en 3D con tolerancias ajustadas. O-Rings de compresión radial eliminan vibración parásita.</p>
+        <span class="badge">PCB 19.8mm</span>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-icon">🔔</div>
+        <div class="arch-card-title">Retroalimentación</div>
+        <h4>Buzzer + LED RGB</h4>
+        <p>Buzzer pasivo a 2700Hz indica ángulo óptimo. LED RGB señaliza estado del sistema en campo.</p>
+        <span class="badge">GPIO 21 / GPIO 2-4</span>
+      </div>
+    </div>
+
+    <!-- Código representativo -->
+    <div class="code-block fade-in">
+<span class="cmt">// Detección de lanzamiento por Jerk (derivada de aceleración)</span>
+<span class="kw">double</span> aMag = <span class="fn">sqrt</span>(ax_f*ax_f + ay_f*ay_f + az_f*az_f);
+<span class="kw">double</span> jerk = (aMag - prev_aMag) / DT;   <span class="cmt">// DT = 0.01s (100Hz)</span>
+
+<span class="kw">if</span> (estadoActual == IDLE && jerk > <span class="num">JERK_THRESHOLD</span>) {
+    <span class="cmt">// Capturar ángulo de lanzamiento en el instante exacto</span>
+    imu::Quaternion quat  = bno.<span class="fn">getQuat</span>();
+    imu::Vector&lt;3&gt;  euler = quat.<span class="fn">toEuler</span>();
+    launchAngle = euler.<span class="fn">y</span>() * <span class="num">180.0</span> / PI;
+    estadoActual = IMPULSO;
+}
+
+<span class="cmt">// Al detectar caída libre después de impulso → calcular métricas</span>
+<span class="kw">if</span> (aMag < <span class="num">FREEFALL_THRESHOLD</span> && maxAccel > <span class="num">ARMING_ACCEL</span>) {
+    <span class="kw">double</span> velFinal = <span class="fn">sqrt</span>(v_x*v_x + v_y*v_y + v_z*v_z);
+    <span class="kw">double</span> distance = (velFinal*velFinal * <span class="fn">sin</span>(<span class="num">2</span>*angleRad)) / g;
+    <span class="kw">double</span> energy   = <span class="num">0.5</span> * JAVELIN_MASS * velFinal * velFinal;
+}
+    </div>
+  </div>
+</section>
+
+<!-- ── WEB UI ── -->
+<section>
+  <div class="section-inner">
+    <div class="section-tag fade-in">// Interfaz Web</div>
+    <h2 class="section-title fade-in">Panel 192.168.4.1</h2>
+    <p class="section-desc fade-in">Sin internet, sin cables. Conéctate a la red LANCEA_AP desde cualquier celular o PC y accede al panel completo de análisis del atleta.</p>
+
+    <div class="web-grid fade-in">
+      <div class="route-card">
+        <div class="route-path">GET /</div>
+        <p>Panel principal. Tabla de lanzamientos, badges de rendimiento (vel. máx, ángulo promedio, distancia, energía) y estado del dispositivo.</p>
+      </div>
+      <div class="route-card">
+        <div class="route-path">GET /atletas</div>
+        <p>Gestión de hasta 10 atletas en memoria RAM. Registrar, activar o eliminar. Los siguientes lanzamientos se asignan al atleta activo.</p>
+      </div>
+      <div class="route-card">
+        <div class="route-path">GET /csv</div>
+        <p>Descarga el archivo CSV del atleta activo. Con parámetro <span style="color:var(--cyan)">?a=Todos</span> descarga todos los atletas en un solo archivo.</p>
+      </div>
+      <div class="route-card">
+        <div class="route-path">GET /status</div>
+        <p>JSON con estado del sistema: lanzamientos, atleta activo, estado FSM, uptime y nivel de batería (voltaje + porcentaje).</p>
+      </div>
+      <div class="route-card">
+        <div class="route-path">GET /reset</div>
+        <p>Borra los lanzamientos del atleta activo con confirmación previa en el navegador.</p>
+      </div>
+      <div class="route-card">
+        <div class="route-path">GET /resetall</div>
+        <p>Limpia toda la sesión en memoria RAM. Usar solo después de exportar el CSV completo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRUEBAS ── -->
+<section id="pruebas" class="arch-section">
+  <div class="section-inner">
+    <div class="section-tag fade-in">// Validación Industrial</div>
+    <h2 class="section-title fade-in">Protocolos de Prueba</h2>
+    <p class="section-desc fade-in">Cada test sigue el principio de cero subjetividad: valores numéricos medibles, criterios definidos antes de energizar el circuito, y resultados reales documentados.</p>
+
+    <div class="tests-grid fade-in">
+      <div class="test-card">
+        <div class="test-id">TEST-HW-01-A · P1 Alto</div>
+        <div class="test-title">Validación Dimensional PCB</div>
+        <p class="test-desc">Ancho de la PCB debe encajar en el Sled (Ø 24mm). Medición en KiCad con tolerancia estricta.</p>
+        <div class="test-result">
+          <span class="test-val">19.8 mm</span>
+          <span class="test-pass">✓ PASS</span>
+        </div>
+      </div>
+
+      <div class="test-card">
+        <div class="test-id">TEST-FW-01-A · P0 Crítico</div>
+        <div class="test-title">Validación Ángulo IMU (Estático)</div>
+        <p class="test-desc">Lectura de Pitch/Roll del BNO055 posicionado a 45° sobre escuadra física. Error máx. ±2°.</p>
+        <div class="test-result">
+          <span class="test-val">44.5° – 45.1°</span>
+          <span class="test-pass">✓ PASS</span>
+        </div>
+      </div>
+
+      <div class="test-card">
+        <div class="test-id">TEST-MC-01-A · P0 Crítico</div>
+        <div class="test-title">Autonomía de Batería</div>
+        <p class="test-desc">Operación continua con Li-Ion 14500 hasta corte BMS a 3.0V. Objetivo: ≥ 6 horas.</p>
+        <div class="test-result">
+          <span class="test-val">7h 15min</span>
+          <span class="test-pass">✓ PASS</span>
+        </div>
+      </div>
+
+      <div class="test-card">
+        <div class="test-id">TEST-HW-01-B · P1 Alto</div>
+        <div class="test-title">Inspección Dimensional Jabalina</div>
+        <p class="test-desc">Diámetro interno de jabalina profesional medido con calibrador Pie de Rey. Debe ser &gt; 24mm.</p>
+        <div class="test-result">
+          <span class="test-val">25.2 mm</span>
+          <span class="test-pass">✓ PASS</span>
+        </div>
+      </div>
+
+      <div class="test-card">
+        <div class="test-id">TEST-FW-02 · P1 Alto</div>
+        <div class="test-title">Tasa de Muestreo 100Hz</div>
+        <p class="test-desc">1000 muestras capturadas. σ(Δt) debe ser &lt; 1ms. Corregido implementando ISR con Timer hardware.</p>
+        <div class="test-result">
+          <span class="test-val">σ &lt; 1ms</span>
+          <span class="test-pass">✓ PASS</span>
+        </div>
+      </div>
+
+      <div class="test-card">
+        <div class="test-id">TEST-FW-01-B · P0 Crítico</div>
+        <div class="test-title">Trigger de Lanzamiento en Campo</div>
+        <p class="test-desc">Lanzamiento real en pista de atletismo. El sistema debe generar archivo CSV con datos completos.</p>
+        <div class="test-result">
+          <span class="test-val">CSV generado ✓</span>
+          <span class="test-pass">✓ PASS</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CHANGELOG V1→V2 ── -->
+<section>
+  <div class="section-inner">
+    <div class="section-tag fade-in">// Evolución del Diseño</div>
+    <h2 class="section-title fade-in">De V1 a V2</h2>
+    <p class="section-desc fade-in">Cada decisión de cambio se fundamentó en restricciones físicas reales descubiertas en laboratorio, no en suposiciones teóricas.</p>
+
+    <div class="changelog-grid fade-in">
+      <div class="change-card">
+        <div class="change-sub">Sensor de medición</div>
+        <h4>Velocimetría</h4>
+        <div class="change-from"><span class="change-from-icon">✕</span> HC-SR04 Ultrasónico</div>
+        <div class="change-to"><span class="change-to-icon">✓</span> IMU BNO055</div>
+        <p class="change-why">El ultrasónico no tiene alcance útil (&gt;4m) y daña la aerodinámica. El BNO055 entrega cuaterniones por hardware.</p>
+      </div>
+      <div class="change-card">
+        <div class="change-sub">Microcontrolador</div>
+        <h4>Factor de forma</h4>
+        <div class="change-from"><span class="change-from-icon">✕</span> ESP32 DevKit V1 (28mm)</div>
+        <div class="change-to"><span class="change-to-icon">✓</span> XIAO ESP32-C3 Mini</div>
+        <p class="change-why">El DevKit estándar (28mm) no cabe en el tubo de la jabalina (25.2mm de diámetro interno).</p>
+      </div>
+      <div class="change-card">
+        <div class="change-sub">Sistema de energía</div>
+        <h4>Tipo de batería</h4>
+        <div class="change-from"><span class="change-from-icon">✕</span> LiPo Plana</div>
+        <div class="change-to"><span class="change-to-icon">✓</span> Li-Ion Cilíndrica 14500</div>
+        <p class="change-why">14mm de diámetro permite ensamble tubular perfecto. Otorgó &gt;7h de autonomía probada.</p>
+      </div>
+      <div class="change-card">
+        <div class="change-sub">Interfaz de usuario</div>
+        <h4>Feedback visual</h4>
+        <div class="change-from"><span class="change-from-icon">✕</span> Pantalla OLED 0.91"</div>
+        <div class="change-to"><span class="change-to-icon">✓</span> Buzzer + LED RGB</div>
+        <p class="change-why">Eliminación de OLED por consumo energético y espacio. El Buzzer da mejor feedback auditivo en campo abierto.</p>
+      </div>
+      <div class="change-card">
+        <div class="change-sub">Almacenamiento</div>
+        <h4>Gestión de datos</h4>
+        <div class="change-from"><span class="change-from-icon">✕</span> Módulo MicroSD (SPI)</div>
+        <div class="change-to"><span class="change-to-icon">✓</span> RAM + WiFi (CSV)</div>
+        <p class="change-why">El aluminio de la jabalina actúa como Jaula de Faraday. SD generaba picos de corriente que corrompían el I2C.</p>
+      </div>
+      <div class="change-card">
+        <div class="change-sub">Estabilidad temporal</div>
+        <h4>Adquisición de datos</h4>
+        <div class="change-from"><span class="change-from-icon">✕</span> loop() con delay()</div>
+        <div class="change-to"><span class="change-to-icon">✓</span> ISR con Timer hardware</div>
+        <p class="change-why">El jitter de loop() superaba 1ms. La ISR garantiza σ &lt; 1ms y muestreo exacto a 100Hz.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── BOM ── -->
+<section class="arch-section">
+  <div class="section-inner">
+    <div class="section-tag fade-in">// BOM · Lista de Materiales</div>
+    <h2 class="section-title fade-in">Presupuesto</h2>
+    <p class="section-desc fade-in">Costo real vs. estimado al cierre del proyecto (Feb 2026). Variación total de apenas +$600 COP sobre el presupuesto inicial.</p>
+
+    <table class="bom-table fade-in">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Componente</th>
+          <th>Especificación</th>
+          <th>Estimado</th>
+          <th>Real</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>01</td><td><div class="item-name">XIAO ESP32-C3</div></td><td><div class="item-spec">WiFi 2.4GHz · Dual Core</div></td><td>$25.000</td><td>$27.500</td><td><span class="pass-badge">✓ Adquirido</span></td></tr>
+        <tr><td>02</td><td><div class="item-name">IMU BNO055</div></td><td><div class="item-spec">9-DOF · I2C · Fusión HW</div></td><td>$120.000</td><td>$115.000</td><td><span class="pass-badge">✓ Adquirido</span></td></tr>
+        <tr><td>03</td><td><div class="item-name">Batería Li-Ion 14500</div></td><td><div class="item-spec">3.7V · ~1000mAh · Cilíndrica</div></td><td>$18.000</td><td>$20.000</td><td><span class="pass-badge">✓ Adquirido</span></td></tr>
+        <tr><td>04</td><td><div class="item-name">TP4056 USB-C</div></td><td><div class="item-spec">Carga LiPo con protección</div></td><td>$3.500</td><td>$3.500</td><td><span class="pass-badge">✓ Adquirido</span></td></tr>
+        <tr><td>05</td><td><div class="item-name">Filamento PETG</div></td><td><div class="item-spec">~20g · Chasis Sled 3D</div></td><td>$5.000</td><td>$5.000</td><td><span class="pass-badge">✓ Adquirido</span></td></tr>
+        <tr><td>06</td><td><div class="item-name">PCB Baquelita</div></td><td><div class="item-spec">Doble cara · Strip 20mm</div></td><td>$5.000</td><td>$6.000</td><td><span class="pass-badge">✓ Adquirido</span></td></tr>
+        <tr><td>07</td><td><div class="item-name">O-Rings + Insumos</div></td><td><div class="item-spec">Cable 30AWG · Estaño</div></td><td>$10.000</td><td>$12.000</td><td><span class="pass-badge">✓ Adquirido</span></td></tr>
+        <tr><td>08</td><td><div class="item-name">LED RGB + Pulsador</div></td><td><div class="item-spec">5mm · Cátodo común · 6×6mm</div></td><td>$1.500</td><td>$1.500</td><td><span class="pass-badge">✓ Adquirido</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="bom-total fade-in">
+      <div>
+        <div class="bom-total-label">Presupuesto estimado</div>
+        <div style="font-size:.9rem; color:var(--muted)">$234.700 COP</div>
+      </div>
+      <div style="text-align:center">
+        <div class="bom-total-label">Variación</div>
+        <div style="color:var(--green); font-weight:600">+0.26%</div>
+      </div>
+      <div style="text-align:right">
+        <div class="bom-total-label">Costo real total</div>
+        <div class="bom-total-val">$235.300 COP</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── EQUIPO ── -->
+<section id="equipo">
+  <div class="section-inner" style="text-align:center">
+    <div class="section-tag fade-in">// Equipo</div>
+    <h2 class="section-title fade-in">Ingenieros a cargo</h2>
+    <p class="section-desc fade-in" style="margin:0 auto 0">Programa de Ingeniería Electrónica · Séptimo Semestre · Universidad del Quindío · Armenia, Colombia · 2025–2026</p>
+
+    <div class="team-grid fade-in">
+      <div class="team-card">
+        <div class="team-avatar">JG</div>
+        <div class="team-name">Joseph Fernando Gutiérrez</div>
+        <div class="team-role">Líder · Firmware · Hardware</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">EC</div>
+        <div class="team-name">Emerson Santiago Córdoba</div>
+        <div class="team-role">Hardware · Mecánica · Integración</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">JP</div>
+        <div class="team-name">Johan Rodrigo Piedrahita</div>
+        <div class="team-role">Pruebas · Calibración · Campo</div>
+      </div>
+    </div>
+
+    <!-- Retroalimentación del cliente -->
+    <div style="margin-top:4rem; display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; text-align:left;" class="fade-in">
+      <div style="background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:2rem; border-left:3px solid var(--cyan)">
+        <div style="font-size:.75rem; color:var(--muted); font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:.1em; margin-bottom:.8rem;">👤 Entrenador · Liga de Atletismo del Quindío</div>
+        <p style="color:var(--text); font-size:.95rem; line-height:1.7; font-style:italic;">"Por fin tenemos datos objetivos e inmediatos. Poder descargar el CSV en la misma pista sin depender de cables o de una red Wi-Fi externa es un cambio total en la dinámica de entrenamiento."</p>
+      </div>
+      <div style="background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:2rem; border-left:3px solid var(--green)">
+        <div style="font-size:.75rem; color:var(--muted); font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:.1em; margin-bottom:.8rem;">🏃 Atleta · Liga de Atletismo del Quindío</div>
+        <p style="color:var(--text); font-size:.95rem; line-height:1.7; font-style:italic;">"El dispositivo es prácticamente imperceptible. El sonido de confirmación me ayudó a saber exactamente cuándo estaba listo para lanzar, sin interrumpir mi concentración."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-logo">LANCEA</div>
+  <div class="footer-links">
+    <a href="https://github.com/josephfgutierrezr-lgtm/Proyecto_CDIOIII_LANCEA" target="_blank">GitHub →</a>
+    <a href="#sistema">Sistema</a>
+    <a href="#arquitectura">Arquitectura</a>
+    <a href="#pruebas">Pruebas</a>
+    <a href="#equipo">Equipo</a>
+  </div>
+  <p>
+    Proyecto CDIO III · Universidad del Quindío · Ingeniería Electrónica<br>
+    Joseph Gutiérrez · Emerson Córdoba · Johan Piedrahita · 2025–2026
+  </p>
+</footer>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
