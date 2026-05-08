@@ -21,6 +21,9 @@ Haz clic en cada enlace para ver el detalle de cada sesión:
 | 10 | Bitácora #10 | [Ver documento](https://docs.google.com/document/d/1GkYeA2pI62UvVJICCQ5gGQ7zZpN7b7SY-defAIAloMg/edit?usp=drive_link) |
 | 11 | Bitácora #11 | [Ver documento](https://docs.google.com/document/d/1O_bVQ67BpS_MziINS0ng6xdSbM-qweT3dsXgktgsXfA/edit?usp=drive_link) |
 | 12 | Bitácora #12 | [Ver documento](https://docs.google.com/document/d/18fROQ_5y_AkvWl3t85IYqPVxsczhZKMRs7h5lcvl7nc/edit?usp=drive_link) |
+| 13 | Bitácora #13 | [Ver documento](https://docs.google.com/document/d/1SV9VKoWgo9cBicWQWKIHf0HUeQpAyeOdmfuNbkDm9SI/edit?usp=sharing) |
+| 14 | Bitácora #14 | [Ver documento](https://docs.google.com/document/d/1RtbjOUo2yBLLyvCr5yDrMufrhcshJpU7QpBLzLa3f70/edit?usp=sharing) |
+| 15 | Bitácora #15 | [Ver documento](https://docs.google.com/document/d/1G6utLq2Wf2w2TfL3KHC8yaZuyGiwOIoT4YJCPDW11Ng/edit?usp=sharing) |
 
 ---
 
