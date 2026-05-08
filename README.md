@@ -1,66 +1,43 @@
-# Proyecto_CDIOIII_LANCEA
-# 🚀 LANCEA: Sistema de Monitoreo Biomecánico para Jabalina
+# 🎯 Proyecto LANCEA: Jabalina Inteligente (CDIO III)
 
-![Status](https://img.shields.io/badge/Status-Prototipo-yellow)
-![Platform](https://img.shields.io/badge/Platform-ESP32-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
-
-**LANCEA** es un sistema embebido de alto rendimiento diseñado para capturar, analizar y transmitir datos cinemáticos durante el lanzamiento de jabalina. Diseñado para superar las limitaciones de los sensores ópticos tradicionales, LANCEA utiliza **Fusión de Sensores Inerciales (IMU)** para reconstruir la trayectoria del vuelo en entornos donde el GPS o el ultrasonido no son viables.
+¡Bienvenidos al repositorio oficial del **Proyecto LANCEA**!
+Este espacio documenta el desarrollo integral de un dispositivo deportivo inteligente enfocado en el atletismo. Aquí encontrarás desde la gestión del proyecto hasta los manuales técnicos, planos y el código que da vida a este sistema.
 
 ---
 
-## 🎯 Objetivo del Proyecto
+## 🚀 ¿Qué es LANCEA?
+**LANCEA** es un dispositivo electrónico embebido diseñado para integrarse en una jabalina deportiva. Su propósito principal es capturar, procesar y transmitir datos biomecánicos y cinemáticos en tiempo real durante el lanzamiento. 
 
-Desarrollar un dispositivo de bajo costo (< $100 USD), ligero y aerodinámico capaz de insertarse en una jabalina de competición para medir:
-1.  **Velocidad de Salida ($V_0$):** Mediante integración de aceleración lineal.
-2.  **Ángulo de Ataque ($\theta$):** Mediante cuaterniones y ángulos de Euler.
-3.  **Estabilidad de Vuelo:** Análisis de rotación (Roll/Yaw).
-4.  **Distancia Estimada:** Proyección balística basada en cinemática.
+Al transformar un implemento deportivo tradicional en una herramienta de análisis de datos, LANCEA busca proporcionar retroalimentación cuantitativa para mejorar la técnica y el rendimiento de los atletas.
 
----
+## 💡 Motivación y Justificación
+El deporte de alto rendimiento exige precisión. Tradicionalmente, el análisis del lanzamiento de jabalina depende de la observación visual o de costosos sistemas de cámaras externas. LANCEA nace de la necesidad de democratizar el acceso a métricas precisas (aceleración, rotación, ángulos de ataque) integrando sensores directamente en el implemento. Esto permite una recolección de datos intrusiva mínima y un análisis de sistemas dinámicos mucho más cercano a la realidad física del atleta.
 
-## 🛠️ Hardware y Arquitectura
+## 🎯 Objetivos
+*   **Monitoreo Preciso:** Capturar datos de movimiento en múltiples ejes de manera continua durante la fase de aceleración y vuelo.
+*   **Procesamiento Eficiente:** Integrar hardware de bajo consumo y alto rendimiento capaz de leer sensores complejos sin latencia.
+*   **Diseño Ergonómico:** Lograr que la adición del hardware no altere significativamente el centro de masa ni la aerodinámica natural de la jabalina.
 
-El sistema opera bajo una arquitectura **"Store & Forward"** (Almacenar y Reenviar) para garantizar la integridad de los datos en lanzamientos de larga distancia (>80m).
+## 🛠️ Retos Superados y Logros Técnicos
+El desarrollo de hardware embebido para un entorno de alto impacto y velocidad presentó desafíos únicos:
 
-### Lista de Componentes (BOM)
-* **MCU:** ESP32-S2 Mini / ESP32-C3 (Dual Core 240MHz).
-* **IMU:** Bosch BNO055 (Acelerómetro + Giroscopio + Magnetómetro + Cortex M0 interno).
-* **Almacenamiento:** Módulo MicroSD SPI (Logging a 100Hz).
-* **Display:** OLED 0.91" I2C (128x32) para feedback inmediato al atleta.
-* **Energía:** Batería Li-Ion 14500 (1000mAh) + BMS TP4056.
-* **Chasis:** Diseño cilíndrico impreso en 3D (PETG) con amortiguación de impacto.
+*   **Optimización de Espacio y Peso:** Para mantener la integridad aerodinámica y el balance de la jabalina, el diseño prescindió de módulos de registro de datos en la mameoria del dispositivo por medio de una pagina web, e informacion que se almacena en el microcontrolador a tiempo real. Esta decisión fue crucial para priorizar la reducción de peso y optimizar el espacio interno disponible.
+*   **Comunicación de Sensores:** Se logró una integración exitosa de la unidad de medición inercial (IMU) BNO055. El núcleo de procesamiento se consolidó utilizando el microcontrolador ESP32-C3 SuperMini, estableciendo una comunicación I2C estable a través de los pines físicos 8 (SDA) y 9 (SCL).
+*   **Consolidación Documental:** Organización sistemática de la planificación maestra, bitácoras, actas y manuales técnicos (Avance Técnico)[cite: 1].
 
-### Diagrama de Bloques
-`[Sensor BNO055] --(I2C)--> [ESP32] --(SPI)--> [Micro SD]`
-`[ESP32] --(WiFi/HTTP)--> [Servidor Python Flask]`
+## 📂 Estructura del Repositorio
+El proyecto está organizado en las siguientes carpetas principales para separar el hardware, el software y la documentación de gestión:
 
----
-
-## ⚙️ Funcionalidades Clave
-
-### 1. Algoritmo de Detección de Lanzamiento
-El sistema permanece en *Deep Sleep* hasta detectar un pico de aceleración **> 4G**, activando el modo de grabación de alta frecuencia.
-
-### 2. Navegación Inercial (Dead Reckoning)
-A diferencia de sistemas básicos que usan ultrasonido (limitado a 4m), LANCEA utiliza el vector de gravedad y la aceleración lineal pura del BNO055 para calcular la velocidad en tiempo real sin referencias externas.
-
-### 3. Sincronización WiFi
-Al recuperar la jabalina, el usuario presiona un botón físico. El ESP32 activa su radio WiFi, busca el servidor local y descarga los archivos `.csv` del vuelo automáticamente.
+*   📁 **`0_1 Gestion`**: Contiene toda la documentación administrativa del proyecto, incluyendo actas de reuniones, cronogramas, listas de materiales (BOM), costos y planeación maestra de las fases CDIO.
+*   📁 **`0_2 Firmware`**: Código fuente desarrollado en C/C++ para el ESP32-C3 SuperMini. Incluye las librerías y rutinas necesarias para la lectura del IMU BNO055 vía I2C y el procesamiento de los datos inerciales.
+*   📁 **`DASHBOARD`**: Archivos y scripts relacionados con la interfaz gráfica o panel de control utilizado para visualizar e interpretar los datos cinemáticos capturados por la jabalina.
+*   📁 **`DEFINITION_DONE`**: Documentación sobre los criterios de aceptación (DoD - *Definition of Done*), estableciendo los requisitos de calidad y funcionalidad que debe cumplir cada entregable o módulo del proyecto.
+*   📁 **`Hardware`**: Planos electrónicos, esquemas de conexión y diseño de integración física de los componentes, garantizando el balance y peso óptimo sin el módulo SD.
+*   📁 **`PROTOCOLO_PRUEBAS`**: Procedimientos, metodologías y registros de validación utilizados para someter el dispositivo a pruebas de impacto, estabilidad de conexión y fiabilidad de captura de datos.
+*   📁 **`Plantilla_checklist`**: Formatos y listas de chequeo estandarizadas para el control de calidad durante el ensamblaje del hardware y la revisión del código.
 
 ---
+*¡Explora los directorios, revisa el código y descubre cómo la electrónica y el deporte se unen en LANCEA!*
 
-## 🚀 Instalación y Uso
-
-### Firmware (ESP32)
-1.  Clonar el repositorio.
-2.  Abrir con **PlatformIO** o **Arduino IDE**.
-3.  Instalar librerías: `Adafruit_BNO055`, `Adafruit_SSD1306`, `SdFat`.
-4.  Configurar credenciales WiFi en `config.h`.
-
-### Servidor Local (Python)
-Para recibir los datos en tu PC:
-```bash
-cd server
-pip install flask
-python server.py
+---
+*¡Explora los directorios, revisa el código y descubre cómo la electrónica y el deporte se unen en LANCEA!*
